@@ -1,0 +1,106 @@
+{extend name="../../base/view/common/base"/}
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+  <a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+  <a href="/home/user/setting">信息设置</a>
+  <a><cite>操作日志</cite></a>
+</span>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="main-content">
+	{include file="../../base/view/common/submenu" /}
+	<div class="main-page-content">
+		<form class="layui-form layui-form-bar">
+			<div class="layui-input-inline" style="width:300px;">
+				<input type="text" name="keywords" placeholder="昵称/操作节点名称/操作数据ID" class="layui-input" autocomplete="off" />
+			</div>
+			<div class="layui-input-inline">
+				<select name="action">
+					<option value="">请选择类型</option>
+					{volist name="$type_action" id="vo"}
+					<option value="{$vo}">{$vo}</option>
+					{/volist}
+				</select>
+			</div>
+			<div class="layui-input-inline" style="width:160px;">
+				<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="searchform"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+				<button type="reset" class="layui-btn layui-btn-reset" lay-filter="reset">清空</button>
+			</div>
+		</form>
+		<div style="width:100%;">
+			<table class="layui-hide" id="test" lay-filter="test"></table>
+		</div>
+	</div>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+const moduleInit = ['tool'];
+	function gouguInit() {
+		var table = layui.table,
+			form = layui.form;
+
+		layui.pageTable = table.render({
+			elem: '#test',
+			title: '操作日志列表',
+			url: "/admin/log/index", //数据接口	
+			page: true, //开启分页
+			limit: 20,
+			height: 'full-112',
+			cols: [
+				[ //表头
+					{
+						field: 'id',
+						title: 'ID号',
+						align: 'center',
+						width: 90
+					}, {
+						field: 'action',
+						title: '操作',
+						align: 'center',
+						width: 80
+					}, {
+						field: 'content',
+						title: '操作描述'
+					}, {
+						field: 'param_id',
+						title: '操作数据ID',
+						align: 'center',
+						width: 100
+					},{
+						field: 'name',
+						title: '操作用户',
+						align: 'center',
+						width: 100
+					}, {
+						field: 'ip',
+						title: 'IP地址',
+						align: 'center',
+						width: 150
+					}, {
+						field: 'create_time',
+						title: '操作时间',
+						fixed: 'right',
+						align: 'center',
+						width: 160
+					}
+				]
+			]
+		});
+
+		//监听搜索提交
+		form.on('submit(searchform)', function (data) {
+			layui.pageTable.reload({
+				where: data.field,
+				page: {curr: 1}
+			});
+			return false;
+		});
+	}
+</script>
+{/block}
+<!-- /脚本 -->

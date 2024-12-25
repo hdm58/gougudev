@@ -1,0 +1,18 @@
+	<div class="sub-menu" style="width: 200px;">
+		<div id="subMenu" class="sub-menu-content" style="width: 200px;">
+			<ul>
+				<li class="sub-menu-title active"><a href="/project/index/view?id={$id}"><i class="iconfont icon-tuiguangtongji"></i><span class="text">项目概览</span></a></li>
+				<li class="sub-menu-title" data-event="subpage" data-page="/api/project/view/id/{$id}?page=task"><a href="javascript:;"><i class="iconfont icon-chengkaoguanli"></i><span class="text">项目任务<cite>({$detail.tasks})</cite></span></a></li>
+				<li class="sub-menu-title" data-event="subpage" data-page="/api/project/view/id/{$id}?page=document"><a href="javascript:;"><i class="iconfont icon-jichushezhi"></i><span class="text">项目文档<cite>({$detail.documents})</cite></span></a></li>
+				<li class="sub-menu-title" data-event="subpage" data-page="/api/project/view/id/{$id}?page=schedule"><a href="javascript:;"><i class="iconfont icon-jichushezhi"></i><span class="text">工作记录<cite>({$detail.schedules})</cite></span></a></li>
+				<li class="sub-menu-title" data-event="subpage" data-page="/api/project/view/id/{$id}?page=comment"><a href="javascript:;"><i class="iconfont icon-zhaoshengzhunbei"></i><span class="text">项目评论<cite>({$detail.comments})</cite></span></a></li>
+				<li class="sub-menu-title" data-event="subpage" data-page="/api/project/view/id/{$id}?page=user"><a href="javascript:;"><i class="iconfont icon-kaohetongji"></i><span class="text">项目人员<cite>({$detail.users})</cite></span></a></li>
+				<li class="sub-menu-title" data-event="subpage" data-page="/api/project/view/id/{$id}?page=log"><a href="javascript:;"><i class="iconfont icon-banjiguanli"></i><span class="text">项目动态</span></a></li>
+			</ul>
+		</div>
+		<div class="menu-bar">
+			<div class="menu-bar-content">
+				<div class="line"></div>
+			</div>
+		</div>
+	</div>

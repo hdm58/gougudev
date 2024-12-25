@@ -1,0 +1,795 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<link rel="stylesheet" href="{__GOUGU__}/third_party/prism/prism.css?v=1"/>
+<link rel="stylesheet" href="{__STATIC__}/viewer/viewer.min.css?v=1"/>
+<link rel="stylesheet" href="{__STATIC__}/ztree/css/metroStyle/metroStyle.css" >
+<style>
+html{background-color:#ffffff;}
+.content-chapter{width:300px; position:fixed; top:50px; left:60px; bottom:0; overflow: hidden; border-right:1px solid #e5ecf0; background-color:#F5F8FA;}
+.content-text{margin-left:300px; padding:16px 32px; max-width:900px;}
+.menu-title span{font-size:12px; font-weight:400}
+.tree-menu{height:calc(100% - 145px); overflow-y: scroll; overflow-x: hidden;}
+
+.editormd-preview2{font-size:16px; line-height:1.72; background-color:#fff;}
+.editormd-html-preview code, .editormd-preview-container code {padding:2px; border-radius:2px; font-size:14px; font-family:SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+.editormd-html-preview, .editormd-preview-container .code-toolbar{font-size:14px;}
+.editormd-preview2 li {list-style: initial;}
+.editormd-html-preview pre, .editormd-preview-container pre{border: 1px solid #f6f6f6; font-size:14px;}
+
+#infoTilte{font-size:28px; padding-bottom:15px;}
+.export-pdf{width:60px; height:90px; text-align:center; position:fixed; top:100px; right:10%;}
+.export-pdf a{width:100%; height:66px; padding:12px 0; display:block; background-color:rgba(66,133,245,.9); color:#fff; border-radius:4px}
+
+.markdown-body {
+  color: #333333;
+  font-family: "Microsoft YaHei", Helvetica, "Meiryo UI", "Malgun Gothic", "Segoe UI", "Trebuchet MS", "Monaco", monospace, Tahoma, STXihei, "华文细黑", STHeiti, "Helvetica Neue", "Droid Sans", "wenquanyi micro hei", FreeSans, Arimo, Arial, SimSun, "宋体", Heiti, "黑体", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.markdown-body a {
+  background: transparent;
+}
+
+.markdown-body a:active,
+.markdown-body a:hover {
+  outline: 0;
+}
+
+.markdown-body strong {
+  font-weight: bold;
+}
+
+.markdown-body h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+
+.markdown-body img {
+  border: 0;
+  margin:12px 0;
+}
+
+.markdown-body hr {
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  height: 0;
+}
+
+.markdown-body pre {
+  overflow: auto;
+  padding:12px 6px;
+  border-radius:4px;
+}
+
+.markdown-body code,
+.markdown-body kbd,
+.markdown-body pre {
+  font-family: "Meiryo UI", "YaHei Consolas Hybrid", Consolas, "Malgun Gothic", "Segoe UI", "Trebuchet MS", Helvetica, monospace, monospace;
+  font-size: 1em;
+}
+
+.markdown-body input {
+  color: inherit;
+  font: inherit;
+  margin: 0;
+}
+
+.markdown-body html input[disabled] {
+  cursor: default;
+}
+
+.markdown-body input {
+  line-height: normal;
+}
+
+.markdown-body input[type="checkbox"] {
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.markdown-body td,
+.markdown-body th {
+  padding: 0;
+}
+
+.markdown-body * {
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.markdown-body input {
+  font: 13px/1.4 Helvetica, arial, freesans, clean, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+.markdown-body a {
+  color: #4183c4;
+  text-decoration: none;
+}
+
+.markdown-body a:hover,
+.markdown-body a:active {
+  text-decoration: underline;
+}
+
+.markdown-body hr {
+  height: 0;
+  margin: 15px 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.markdown-body hr:before {
+  display: table;
+  content: "";
+}
+
+.markdown-body hr:after {
+  display: table;
+  clear: both;
+  content: "";
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  line-height: 1.1;
+}
+
+.markdown-body h1 {
+  font-size: 28px;
+}
+
+.markdown-body h2 {
+  font-size: 24px;
+}
+
+.markdown-body h3 {
+  font-size: 20px;
+}
+
+.markdown-body h4 {
+  font-size: 18px;
+}
+
+.markdown-body h5 {
+  font-size: 16px;
+}
+
+.markdown-body h6 {
+  font-size: 14px;
+}
+
+.markdown-body blockquote {
+  margin: 0;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.markdown-body ol ol,
+.markdown-body ul ol {
+  list-style-type: lower-roman;
+}
+
+.markdown-body ul ul ol,
+.markdown-body ul ol ol,
+.markdown-body ol ul ol,
+.markdown-body ol ol ol {
+  list-style-type: lower-alpha;
+}
+
+.markdown-body dd {
+  margin-left: 0;
+}
+
+.markdown-body code {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 12px;
+}
+
+.markdown-body pre {
+  margin-top: 0;
+  margin-bottom: 0;
+  font: 14px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+
+.markdown-body .octicon {
+  font: normal normal 16px octicons-anchor;
+  line-height: 1;
+  display: inline-block;
+  text-decoration: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.markdown-body .octicon-link:before {
+  content: '\f05c';
+}
+
+.markdown-body > *:first-child {
+  margin-top: 0 !important;
+}
+
+.markdown-body > *:last-child {
+  margin-bottom: 0 !important;
+}
+
+.markdown-body .anchor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  padding-right: 6px;
+  padding-left: 30px;
+  margin-left: -30px;
+}
+
+.markdown-body .anchor:focus {
+  outline: none;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  position: relative;
+  margin-top: 1em;
+  margin-bottom: 16px;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.markdown-body h1 .octicon-link,
+.markdown-body h2 .octicon-link,
+.markdown-body h3 .octicon-link,
+.markdown-body h4 .octicon-link,
+.markdown-body h5 .octicon-link,
+.markdown-body h6 .octicon-link {
+  display: none;
+  color: #000;
+  vertical-align: middle;
+}
+
+.markdown-body h1:hover .anchor,
+.markdown-body h2:hover .anchor,
+.markdown-body h3:hover .anchor,
+.markdown-body h4:hover .anchor,
+.markdown-body h5:hover .anchor,
+.markdown-body h6:hover .anchor {
+  padding-left: 8px;
+  margin-left: -30px;
+  text-decoration: none;
+}
+
+.markdown-body h1:hover .anchor .octicon-link,
+.markdown-body h2:hover .anchor .octicon-link,
+.markdown-body h3:hover .anchor .octicon-link,
+.markdown-body h4:hover .anchor .octicon-link,
+.markdown-body h5:hover .anchor .octicon-link,
+.markdown-body h6:hover .anchor .octicon-link {
+  display: inline-block;
+}
+
+.markdown-body p,
+.markdown-body blockquote,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body dl,
+.markdown-body table,
+.markdown-body pre {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 2em;
+}
+
+.markdown-body ul ul,
+.markdown-body ul ol,
+.markdown-body ol ol,
+.markdown-body ol ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.markdown-body li > p {
+  margin-top: 12px;
+}
+
+.markdown-body dl {
+  padding: 0;
+}
+
+.markdown-body dl dt {
+  padding: 0;
+  margin-top: 12px;
+  font-size: 1em;
+  font-style: italic;
+  font-weight: bold;
+}
+
+.markdown-body dl dd {
+  padding: 0 16px;
+  margin-bottom: 12px;
+}
+
+.markdown-body blockquote {
+  padding: 0 15px;
+  color: #666666;
+  border-left: 4px solid #ddd;
+}
+
+.markdown-body blockquote > :first-child {
+  margin-top: 0;
+}
+
+.markdown-body blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body table {
+  display: block;
+  width: 100%;
+  overflow: auto;
+  word-break: normal;
+  word-break: keep-all;
+}
+
+.markdown-body table th {
+  font-weight: bold;
+}
+
+.markdown-body table th,
+.markdown-body table td {
+  padding: 6px 13px;
+  border: 1px solid #ddd;
+}
+
+.markdown-body table tr {
+  background-color: #fff;
+  border-top: 1px solid #ccc;
+}
+
+.markdown-body table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+.markdown-body img {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.markdown-body code {
+  padding: 1px 2px 2px 2px;
+  margin: 0;
+  font-size: 85%;
+  background-color: #f7f7f7;
+  border:1px solid #e8e8e8;
+}
+
+.markdown-body code:before,
+.markdown-body code:after {
+  letter-spacing: -0.2em;
+  content: "\00a0";
+}
+
+.markdown-body pre > code {
+  padding: 0;
+  margin: 0;
+  font-size: 100%;
+  word-break: normal;
+  white-space: pre;
+  background: transparent;
+  border: 0;
+}
+
+.markdown-body .highlight {
+  margin-bottom: 16px;
+}
+
+.markdown-body .highlight pre,
+.markdown-body pre {
+  padding: 16px;
+  overflow: auto;
+  line-height: 1.6;
+  background-color: #f7f7f7;
+  border-radius: 3px;
+}
+
+.markdown-body .highlight pre {
+  margin-bottom: 0;
+  word-break: normal;
+}
+
+.markdown-body pre {
+  word-wrap: normal;
+}
+
+.markdown-body pre code {
+  display: inline;
+  max-width: initial;
+  padding: 0;
+  margin: 0;
+  overflow: initial;
+  line-height: inherit;
+  word-wrap: normal;
+  background-color: transparent;
+  border: 0;
+}
+
+.markdown-body pre code:before,
+.markdown-body pre code:after {
+  content: normal;
+}
+
+.markdown-body kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font-size: 11px;
+  line-height: 10px;
+  color: #555;
+  vertical-align: middle;
+  background-color: #fcfcfc;
+  border: solid 1px #ccc;
+  border-bottom-color: #bbb;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #bbb;
+}
+
+.markdown-body .pl-c {
+  color: #969896;
+}
+
+.markdown-body .pl-c1,
+.markdown-body .pl-mdh,
+.markdown-body .pl-mm,
+.markdown-body .pl-mp,
+.markdown-body .pl-mr,
+.markdown-body .pl-s1 .pl-v,
+.markdown-body .pl-s3,
+.markdown-body .pl-sc,
+.markdown-body .pl-sv {
+  color: #0086b3;
+}
+
+.markdown-body .pl-e,
+.markdown-body .pl-en {
+  color: #795da3;
+}
+
+.markdown-body .pl-s1 .pl-s2,
+.markdown-body .pl-smi,
+.markdown-body .pl-smp,
+.markdown-body .pl-stj,
+.markdown-body .pl-vo,
+.markdown-body .pl-vpf {
+  color: #333333;
+}
+
+.markdown-body .pl-ent {
+  color: #63a35c;
+}
+
+.markdown-body .pl-k,
+.markdown-body .pl-s,
+.markdown-body .pl-st {
+  color: #a71d5d;
+}
+
+.markdown-body .pl-pds,
+.markdown-body .pl-s1,
+.markdown-body .pl-s1 .pl-pse .pl-s2,
+.markdown-body .pl-sr,
+.markdown-body .pl-sr .pl-cce,
+.markdown-body .pl-sr .pl-sra,
+.markdown-body .pl-sr .pl-sre,
+.markdown-body .pl-src {
+  color: #df5000;
+}
+
+.markdown-body .pl-mo,
+.markdown-body .pl-v {
+  color: #1d3e81;
+}
+
+.markdown-body .pl-id {
+  color: #b52a1d;
+}
+
+.markdown-body .pl-ii {
+  background-color: #b52a1d;
+  color: #f8f8f8;
+}
+
+.markdown-body .pl-sr .pl-cce {
+  color: #63a35c;
+  font-weight: bold;
+}
+
+.markdown-body .pl-ml {
+  color: #693a17;
+}
+
+.markdown-body .pl-mh,
+.markdown-body .pl-mh .pl-en,
+.markdown-body .pl-ms {
+  color: #1d3e81;
+  font-weight: bold;
+}
+
+.markdown-body .pl-mq {
+  color: #008080;
+}
+
+.markdown-body .pl-mi {
+  color: #333333;
+  font-style: italic;
+}
+
+.markdown-body .pl-mb {
+  color: #333333;
+  font-weight: bold;
+}
+
+.markdown-body .pl-md,
+.markdown-body .pl-mdhf {
+  background-color: #ffecec;
+  color: #bd2c00;
+}
+
+.markdown-body .pl-mdht,
+.markdown-body .pl-mi1 {
+  background-color: #eaffea;
+  color: #55a532;
+}
+
+.markdown-body .pl-mdr {
+  color: #795da3;
+  font-weight: bold;
+}
+
+.markdown-body kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  line-height: 10px;
+  color: #555;
+  vertical-align: middle;
+  background-color: #fcfcfc;
+  border: solid 1px #ccc;
+  border-bottom-color: #bbb;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #bbb;
+}
+
+.markdown-body .task-list-item {
+  list-style-type: none;
+}
+
+.markdown-body .task-list-item + .task-list-item {
+  margin-top: 3px;
+}
+
+.markdown-body .task-list-item input {
+  float: left;
+  margin: 0.3em 0 0.25em -1.6em;
+  vertical-align: middle;
+}
+
+.markdown-body :checked + .radio-label {
+  z-index: 1;
+  position: relative;
+  border-color: #4183c4;
+}
+
+</style>
+{/block}
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+  <a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+  <a href="/knowledge/index/index">知识库</a>
+  <a><cite>知识详情</cite></a>
+</span>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="main-content">
+	{empty name="$info"}
+	<div style="padding:200px 0 0; width:100%; min-height:500px; text-align:center; font-size:30px; color:#999">暂无文档内容</div>
+	{else/}
+	<div class="content-chapter">
+		<div class="p-4">
+			<h4>{$detail['title']}</h4>
+			<p class="font-gray py-4">创建人：{$detail['user']}</p>
+			<h5 class="menu-title">目录<span class="font-gray">（{$detail['count']}）</span></h5>
+		</div>
+		<div class="tree-menu px-4">
+			<ul id="treeDemo" class="ztree"></ul>
+		</div>
+	</div>
+	<div class="content-text">		
+		<div class="pb-4"><h2 id="infoTilte">{$info.title}</h2></div>
+		<div id="infoFile">
+		{notempty name="$info.file_array" }
+			<table class="layui-table layui-table-form mb-3">
+				<thead>
+					<tr>
+						<th width="90%">文件名</th>
+						<th width="10%" style="text-align:center">操作</th>
+					</tr>
+				</thead>
+				<tbody id="flieList">
+					{volist name="$info.file_array" id="vo"}
+					<tr class="file-tr">
+						<td>{$vo.name}</td>
+						<td style="text-align: center;">
+							<a class="layui-btn layui-btn-xs" href="{$vo.filepath}" download="{$vo.name}" data-id="{$vo.id}">下载</a>
+						</td>
+					</tr>
+					{/volist}
+				</tbody>
+			</table>
+			{/notempty}
+		</div> 
+		<div class="editormd-preview2">
+			<div class="markdown-body" id="infoContent">
+			{$info.content|raw}
+			</div>
+		</div>
+	</div>
+	<div class="export-pdf" id="exportPdf">
+		<a href="/api/knowledge/pdf/id/{$info.id}" target="_blank"><span class="iconfont icon-lunwenshenbao" style="font-size:32px;"></span><br>导出<br>PDF</a>
+	</div>
+	{/empty}
+</div>
+{/block}
+<!-- /主体 -->
+{block name="footer"}{/block}
+<!-- 脚本 -->
+{block name="script"}
+<script src="{__STATIC__}/ztree/js/jquery.ztree.all.min.js?v=1"></script>
+<script src="{__STATIC__}/viewer/viewer.min.js?v=1"></script>
+<script src="{__GOUGU__}/third_party/prism/prism.js?v=1"></script>
+<script>
+var kid='{$kid}';
+var did='{$id}';
+var treeObj = null;
+var zNodes =[
+	{ id:1, pId:0, name:"文档", open:true}
+];
+
+const moduleInit = ['tool'];
+function gouguInit() {
+	var layer = layui.layer;
+	var tool = layui.tool;
+	
+	var viewer = new Viewer(document.getElementById('infoContent'));
+	var $codepre = $("code[class]");
+	if($codepre.length>0){
+		for(var i = 0;i<$codepre.length;i++){
+			var item = $codepre.eq(i).parent();
+			item.addClass("line-numbers");
+		}
+	}
+	
+	var setting = {
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		callback: {
+			onClick: zTreeOnClick
+		}
+	};
+	function zTreeOnClick(event, treeId, treeNode) {
+		let type=treeNode.type;
+		let id=treeNode.id;
+		if(type==1){
+			detail(id);
+		}
+		if(type == 2){
+			treeObj.expandNode(treeNode, !treeNode.open, false, true);
+		}
+		if(type == 3){
+			window.open(treeNode.link);
+		}
+	};
+	
+	let treeback = function(e){
+		if (e.code == 0) {
+			zNodes = e.data;
+			treeObj = $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+			treeObj.expandAll(true);
+			if(did>0){
+				var node = treeObj.getNodeByParam("id", did, null);
+				treeObj.selectNode(node);
+			}
+		} else {
+			layer.msg(e.msg);
+		}
+	}
+	tool.get("/api/index/get_doc_list",{kid:kid,tree:2},treeback);
+
+	function detail(id){
+		viewer.destroy();
+		let detailback = function(e){
+			if (e.code == 0) {
+				history.pushState({},e.data.title,window.location.protocol+'//'+window.location.host+'/knowledge/index/doc_detail/kid/'+kid+'/id/'+id+'.html');
+				$('#infoTilte').html(e.data.title);
+				$('#exportPdf').html('<a href="/api/knowledge/pdf/id/'+e.data.id+'" target="_blank"><span class="iconfont icon-lunwenshenbao" style="font-size:32px;"></span><br>导出<br>PDF</a>');
+				
+				if(e.data.file_array.length>0){
+					let file_array=e.data.file_array;
+					let file_tr='';
+					for(i=0;i<file_array.length;i++){
+						file_tr+='<tr class="file-tr">\
+							<td>'+file_array[i].name+'</td>\
+							<td style="text-align: center;">\
+								<a class="layui-btn layui-btn-xs" href="'+file_array[i].filepath+'" download="'+file_array[i].name+'">下载</a>\
+							</td>\
+						</tr>';
+					}
+					let file_table = '<table class="layui-table layui-table-form mb-3">\
+						<thead>\
+							<tr>\
+								<th width="90%">文件名</th>\
+								<th width="10%" style="text-align:center">操作</th>\
+							</tr>\
+						</thead>\
+						<tbody>'+file_tr+'</tbody>\
+					</table>';
+					$('#infoFile').html(file_table);	
+				}
+				else{
+					$('#infoFile').html('');
+				}
+				
+				$('#infoContent').html(e.data.content);				
+				document.body.scrollTop=document.documentElement.scrollTop=0
+				var $codepre = $('#infoContent').find("code[class]");
+				if($codepre.length>0){
+					for(var i = 0;i<$codepre.length;i++){
+						var item = $codepre.eq(i).parent();
+						item.addClass("line-numbers").addClass('lang-javascript');
+					}
+					Prism.highlightAll();
+				}
+				viewer = new Viewer(document.getElementById('infoContent'));
+			} else {
+				layer.msg(e.msg);
+			}
+		}
+		tool.get("/knowledge/index/doc_detail",{id:id},detailback);
+	}
+}
+</script>
+{/block}
+<!-- /脚本 -->

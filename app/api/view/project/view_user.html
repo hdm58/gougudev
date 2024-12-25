@@ -1,0 +1,106 @@
+<div class="table-content" id="scheduleList">
+	<div class="layui-form-bar border-t border-x">
+		<button class="layui-btn layui-btn-sm add-user">+ 新增项目成员</button>
+	</div>
+	<table class="layui-hide" id="user" lay-filter="user"></table>
+</div>
+<script>
+	function pageInit() {
+		var project_id = '{$id}';
+		var table = layui.table, tool = layui.tool, employeepicker = layui.employeepicker;
+
+		layui.userTable = table.render({
+			elem: '#user',
+			title: '项目成员列表',
+			cellMinWidth: 80,
+			url: "/api/project/user", //数据接口
+			where: { 'tid': project_id },
+			page: false, //开启分页
+			limit: 20,
+			cols: [[ //表头
+				{ field: 'name', fixed: 'left', title: '成员姓名', width: 90, rowspan: 2 }
+				, { field: 'create_time', title: '进入项目日期', width: 110, align: 'center', rowspan: 2 }
+				, { field: 'role', title: '角色', align: 'center', width: 90, rowspan: 2, templet: function (d) {
+					var html='<span style="color: #4285F4;">普通成员</span>';
+					if(d.role==1){
+						html='<span style="color: #EE6666;">项目创建人</span>';
+					}
+					if(d.role==2){
+						html='<span style="color: #91CC75;">项目负责人</span>';
+					}
+					return html;
+				}}
+				, { field: 'position', title: '职位', align: 'center', width: 100, rowspan: 2 }
+				, { field: 'department', title: '所在部门', align: 'center', width: 120, rowspan: 2 }
+				, { field: 'mobile', title: '手机号码', align: 'center', width: 110, rowspan: 2 }
+				, { field: 'email', title: '电子邮箱', align: 'center', rowspan: 2 }
+				, { align: 'center', title: '工作记录', colspan: 2 }
+				, { align: 'center', title: '项目任务', colspan: 3 }
+				, { align: 'center', title: 'BUG缺陷', colspan: 3 }
+				, { field: 'delete_time', title: '移除日期', align: 'center', width: 110, rowspan: 2 }
+				, { field: 'status',fixed: 'right', title: '状态', align: 'center', width: 60, rowspan: 2, templet: function (d) {
+						var html = '<span style="color:#EE6666">✘</span>';
+						if(d.delete_time == 0)
+							html = '<span style="color:#91CC75">✔</span>';
+						return html;
+					}}				
+				, {title: '操作',fixed: 'right', align: 'center', width: 60, rowspan: 2, templet: function (d) {
+						var html = '<span class="layui-btn layui-btn-xs" lay-event="recover">恢复</span>';
+						if(d.delete_time == 0)
+							html = '<span class="layui-btn layui-btn-danger layui-btn-xs" lay-event="remove">移除</span>';
+						return html;
+					}
+				}
+			], [
+				{ field: 'schedules', align: 'center', style: 'color: #91CC75;', width: 72, 'title': '记录' }
+				, { field: 'labor_times', align: 'center', style: 'color: #4285F4;', width: 70, 'title': '工时' }
+				, { field: 'tasks_a_unfinish', align: 'center', style: 'color: #91CC75;', width: 72, 'title': '进行中' }
+				, { field: 'tasks_a_finish', align: 'center', style: 'color: #FAC858;', width: 70, 'title': '已完成' }
+				, { field: 'tasks_a_pensent', align: 'center', style: 'color: #EE6666;', width: 72, 'title': '完成率' }
+				, { field: 'tasks_b_unfinish', align: 'center', style: 'color: #91CC75;', width: 72, 'title': '进行中' }
+				, { field: 'tasks_b_finish', align: 'center', style: 'color: #FAC858;', width: 72, 'title': '已完成' }
+				, { field: 'tasks_b_pensent', align: 'center', style: 'color: #EE6666;', width: 72, 'title': '修复率' }
+			]]
+		});
+
+		// 选择员工
+		$('.layui-form-bar').on('click', '.add-user', function () {
+			employeepicker.employeeInit({
+				type:0,
+				callback:function(seleted){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if(e.code == 0){
+							tool.page('/api/project/view/id/'+project_id+'?page=user');
+						}						
+					}
+					tool.post("/api/project/add_user", {uid: seleted.id,project_id: project_id}, callback);
+					that.next().val(seleted.id);
+				}
+			});
+		});
+
+		//监听行工具事件
+		table.on('tool(user)', function (obj) {
+			let postData = { "id": obj.data.id };
+			let callback = function (e) {
+					layer.closeAll();
+					layer.msg(e.msg);
+					if(e.code == 0){
+						tool.page('/api/project/view/id/'+project_id+'?page=user');
+					}
+				}
+			if (obj.event === 'remove') {
+				layer.confirm('确定要移除该项目成员吗?', { icon: 3, title: '提示' }, function (index) {
+					tool.delete("/api/project/remove_user", postData, callback);
+				});
+			}
+			if (obj.event === 'recover') {
+				layer.confirm('确定要恢复该项目成员吗?', { icon: 3, title: '提示' }, function (index) {
+					tool.post("/api/project/recover_user", postData, callback);
+				});
+			}
+			return;
+		});
+	}		
+</script>

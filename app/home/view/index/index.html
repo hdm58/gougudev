@@ -1,0 +1,704 @@
+{extend name="../../base/view/common/base" /}
+{block name="body"}
+<div class="card-content">
+	<div class="layui-row layui-col-space12">
+		<div class="layui-col-md8">
+			<div class="layui-row layui-col-space12">
+				<div class="layui-col-md12">
+					<div class="layui-card">
+						<dl class="home-desc p-4">
+							<dt><img src="{$params.thumb}" onerror="javascript:this.src='{__IMG__}/icon.png';this.onerror=null;"></dt>
+							<dd class="h5">Hi {$params.name}，我是{:get_system_config('web','admin_title')}，是您工作中必不可少的伙伴！</dd>
+							<dd>{:get_system_config('web','admin_title')}是一款敏捷研发协作系统工具，帮助研发团队透明化工作进展，提升协作效率，推动项目进度。</dd>
+						</dl>
+					</div>
+					<div class="layui-card">
+						<div class="table-title">最新企业公告</div>
+						<div style="padding:8px 12px 12px;">
+							<table class="layui-table">
+								<colgroup>
+									<col width="80">
+									<col width="90">
+									<col>
+									<col width="136">
+								</colgroup>
+								<thead>
+									<tr>
+										<th style="text-align:center">编号ID</th>
+										<th style="text-align:center">公告分类</th>
+										<th>公告标题</th>
+										<th style="text-align:center">发布时间</th>
+									</tr>
+								</thead>
+								<tbody class="layui-table-body">
+									{empty name="note_list"}
+									<tr>
+										<td colspan="4">
+											<div class="layui-none">无数据</div>
+										</td>
+									</tr>
+									{/empty}
+									{volist name="note_list" id="vo"}
+									<tr>
+										<td align="center">N{$vo.id}</td>
+										<td align="center">{$vo.cate_title}</td>
+										<td><a class="open-a" data-href="/home/index/note_detail/id/{$vo.id}">{$vo.title}</a></td>
+										<td align="center">{$vo.create_time}</td>
+									</tr>
+									{/volist}
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="layui-card">
+						<div class="table-title">我参与的项目</div>
+						<div style="padding:8px 12px 12px;">
+							<table class="layui-table">
+								<colgroup>
+									<col width="80">
+									<col width="70">
+									<col>
+									<col width="80">
+									<col width="60">
+									<col width="180">
+								</colgroup>
+								<thead>
+									<tr>
+										<th style="text-align:center">编号ID</th>
+										<th style="text-align:center">状态</th>
+										<th>项目主题</th>
+										<th style="text-align:center">负责人</th>
+										<th style="text-align:center">任务</th>
+										<th style="text-align:center">计划工期</th>
+									</tr>
+								</thead>
+								<tbody class="layui-table-body">
+									{empty name="$project.list"}
+									<tr>
+										<td colspan="6">
+											<div class="layui-none">无数据</div>
+										</td>
+									</tr>
+									{/empty}
+									{volist name="$project.list" id="vo"}
+									<tr>
+										<td align="center">M{$vo.id}</td>
+										<td align="center"><span class="layui-badge bg-status-{$vo.status}">{$vo.status_name}</span></td>
+										<td><a class="link-a" data-href="/project/index/view/id/{$vo.id}">{$vo.name}</a>
+										</td>
+										<td align="center">{$vo.director_name|default=''}</td>
+										<td align="center">{$vo.tasks}</td>
+										<td align="center">{$vo.plan_time}</td>
+									</tr>
+									{/volist}
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<div class="layui-card">
+						<div class="table-title">我参与的任务</div>
+						<div style="padding:8px 12px 12px;">
+							<table class="layui-table">
+								<colgroup>
+									<col width="80">
+									<col width="70">
+									<col>
+									<col width="60">
+									<col width="80">
+									<col width="110">
+								</colgroup>
+								<thead>
+									<tr>
+										<th style="text-align:center">编号ID</th>
+										<th style="text-align:center">状态</th>
+										<th>任务主题</th>
+										<th style="text-align:center">类型</th>
+										<th style="text-align:center">预估工时</th>
+										<th style="text-align:center">计划完成日期</th>
+									</tr>
+								</thead>
+								<tbody class="layui-table-body">
+									{empty name="$task.list"}
+									<tr>
+										<td colspan="6">
+											<div class="layui-none">无数据</div>
+										</td>
+									</tr>
+									{/empty}
+									{volist name="$task.list" id="vo"}
+									<tr>
+										<td align="center">T{$vo.id}</td>
+										<td align="center"><span
+												class="layui-badge bg-flow-{$vo.flow_status}">{$vo.flow_name}</span>
+										</td>
+										<td><span
+												class="layui-badge bg-priority-{$vo.priority}">{$vo.priority_name}</span>
+											<a class="open-a" data-href="/task/index/view/id/{$vo.id}">{$vo.title}</a>
+										</td>
+										<td align="center">{$vo.type_name}</td>
+										<td align="center">{$vo.plan_hours}</td>
+										<td align="center">{$vo.end_time}</td>
+									</tr>
+									{/volist}
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<div class="layui-card">
+						<div class="table-title">最新知识文档</div>
+						<div style="padding:8px 12px 12px;">
+							<table class="layui-table">
+								<colgroup>
+									<col width="80">
+									<col width="90">
+									<col>
+									<col width="60">
+									<col width="80">
+									<col width="136">
+								</colgroup>
+								<thead>
+									<tr>
+										<th style="text-align:center">编号ID</th>
+										<th style="text-align:center">所属分类</th>
+										<th>知识主题</th>
+										<th style="text-align:center">阅览数</th>
+										<th style="text-align:center">创建员工</th>
+										<th style="text-align:center">创建时间</th>
+									</tr>
+								</thead>
+								<tbody class="layui-table-body">
+									{empty name="knowledge_list"}
+									<tr>
+										<td colspan="6">
+											<div class="layui-none">无数据</div>
+										</td>
+									</tr>
+									{/empty}
+									{volist name="knowledge_list" id="vo"}
+									<tr>
+										<td align="center">K{$vo.id}</td>
+										<td align="center">{$vo.cate_name}</td>
+										<td><a class="link-a" data-href="/knowledge/index/doc_detail/kid/{$vo.id}">{$vo.title}</a></td>
+										<td align="center">{$vo.views}</td>
+										<td align="center">{$vo.admin_name}</td>
+										<td align="center">{$vo.create_time}</td>
+									</tr>
+									{/volist}
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="layui-card">
+						<div id="chartView" style="width: 100%; height:300px;"></div>
+					</div>
+					<div class="layui-card">
+						<div id="chartYear" style="width: 100%; height:240px;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="layui-col-md4">
+			<div class="layui-card dashboard-num">
+				<table>
+					<tbody>
+						<tr>
+							<td>
+								<div class="num-title">产品</div>
+								<div class="num-num">{$count.product}</div>
+							</td>
+							<td>
+								<div class="num-title">项目</div>
+								<div class="num-num">{$count.projects}</div>
+							</td>
+							<td>
+								<div class="num-title">任务</div>
+								<div class="num-num">{$count.tasks}</div>
+							</td>
+							<td>
+								<div class="num-title">知识库</div>
+								<div class="num-num">{$count.knowledges}</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="layui-card">
+				<div class="table-title">系统信息</div>
+				<div class="layui-card-body">
+					<table class="layui-table" lay-skin="" lay-size="sm">
+						{if condition="($install == true)"}
+						<tr>
+							<td colspan="4" style="color: #E94335; background-color:#fafafa">
+								提醒：发现app目录下的install文件夹没删除，为了系统的安全,请手动去删除。</td>
+						</tr>
+						{/if}
+						<tr>
+							<td class="info-td">服务器系统</td>
+							<td>{:get_system_info('os')}</td>
+							<td class="info-td">PHP版本</td>
+							<td>{:get_system_info('php')}</td>
+						</tr>
+						<tr>
+							<td class="info-td">上传附件限制</td>
+							<td>{:get_system_info('upload_max_filesize')}</td>
+							<td class="info-td">执行时间限制</td>
+							<td>{:get_system_info('max_execution_time')}</td>
+						</tr>
+						<tr>
+							<td class="info-td">ThinkPHP版本</td>
+							<td>{$TP_VERSION}</td>
+							<td class="info-td">Layui版本</td>
+							<td>{:LAYUI_VERSION}</td>
+						</tr>
+						<tr>
+							<td class="info-td">勾股DEV</td>
+							<td colspan="3">{:CMS_VERSION}<a class="layui-badge layui-bg-blue" style="margin-left:8px"
+									href="https://blog.gougucms.com/home/book/detail/bid/7.html"
+									target="_blank">勾股DEV文档</a></td>
+						</tr>
+						<tr>
+							<td class="info-td">合作联系</td>
+							<td colspan="3"><i class="iconfont icon-weixin green"></i>微信号：hdm588，业务合作、功能定制、安装服务</td>
+						</tr>
+						<tr>
+							<td class="info-td">QQ交流群</td>
+							<td colspan="3">搜Q群：24641076（满），46924914<br>或点击 <a href="https://jq.qq.com/?_wv=1027&k=aCESqWHQ" target="_blank" rel="nofollow"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="gougucms交流群" title="点击链接加入群聊【勾股开源交流群】" style="vertical-align:middle"></a></td>
+						</tr>
+						<tr>
+							<td class="info-td">同系列开源软件</td>
+							<td colspan="3"><a class="layui-badge layui-bg-blue" style="margin-right:8px"
+									href="https://gitee.com/gouguopen/gougucms" target="_blank">勾股CMS</a><a
+									class="layui-badge layui-bg-blue" style="margin-right:8px"
+									href="https://gitee.com/gouguopen/blog" target="_blank">勾股BLOG</a><a
+									class="layui-badge layui-bg-blue" style="margin-right:8px"
+									href="https://gitee.com/gouguopen/office" target="_blank">勾股OA</a><a
+									class="layui-badge layui-bg-blue"
+									href="https://gitee.com/gouguopen/guoguadmin" target="_blank">勾股Admin</a></td>
+						</tr>
+						<tr>
+							<td class="info-td">🍗🍗🍗<br />给作者加鸡腿<br />🍗🍗🍗</td>
+							<td colspan="3">
+								<img src="https://www.gougucms.com/static/home/images/zfb.png" data-event="pay"
+									style="width:50%; max-width:100%; cursor:pointer;" align=center /><img
+									src="https://www.gougucms.com/static/home/images/wx.png" data-event="pay"
+									style="width:50%; max-width:100%; cursor:pointer;" align=center />
+							</td>
+						</tr>
+					</table>
+					<script>
+						$('body').on('click', '[data-event="pay"]', function () {
+							var src = $(this).attr('src');
+							layer.open({
+								type: 1,
+								title: '感谢您给作者加鸡腿🍗🍗',
+								content: '<img src="' + src + '" style="width:100%" align=center />',
+							});
+						})
+					</script>
+				</div>
+			</div>
+
+			<div class="layui-card dashboard-total">
+				<div class="table-title mb-3">我的工作情况</div>
+				<div class="layui-card dashboard-num">
+					<table>
+						<tbody>
+							<tr>
+								<td>
+									<div class="num-title">参与项目</div>
+									<div class="num-num">{$project.count}</div>
+								</td>
+								<td>
+									<div class="num-title">已完成</div>
+									<div class="num-num">{$project.count_ok}</div>
+								</td>
+								<td>
+									<div class="num-title">未完成</div>
+									<div class="num-num">{$project.count_no}</div>
+								</td>
+								<td>
+									<div class="num-title">完成率</div>
+									<div class="num-num">{$project.count_lv}%</div>
+									<div class="badge"><span class="layui-bg-blue">影响力</span></div>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="num-title">参与任务</div>
+									<div class="num-num">{$task.count}</div>
+								</td>
+								<td>
+									<div class="num-title">已完成</div>
+									<div class="num-num">{$task.count_ok}</div>
+								</td>
+								<td>
+									<div class="num-title">未完成</div>
+									<div class="num-num">{$task.count_no}</div>
+								</td>
+								<td>
+									<div class="num-title">完成率</div>
+									<div class="num-num">{$task.count_lv}%</div>
+									<div class="badge"><span class="layui-bg-blue">拼效率</span></div>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="num-title">工作记录</div>
+									<div class="num-num">{$work.count}</div>
+								</td>
+								<td>
+									<div class="num-title">总工时</div>
+									<div class="num-num">{$work.hours}</div>
+								</td>
+								<td>
+									<div class="num-title">任务延期</div>
+									<div class="num-num">{$task.delay}</div>
+								</td>
+								<td>
+									<div class="num-title">延期率</div>
+									<div class="num-num">{$task.delay_lv}%</div>
+									<div class="badge"><span class="layui-bg-blue">勤奋度</span></div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<div class="layui-card">
+				<div class="table-title">最活跃员工<span
+						style="color:#999; font-size:14px; font-weight:400; margin-left:5px">最近30天前十的活跃度</span></div>
+				<div class="layui-card-body">
+					<div id="logChart" style="width: 100%; height:268px;"></div>
+				</div>
+			</div>
+			<div class="layui-card">
+				<div class="table-title">员工最新动态</div>
+				<div class="layui-card-body dashboard-logs">
+					<ul class="layui-timeline" id="logs"></ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	{/block}
+	<!-- 脚本 -->
+	{block name="script"}
+	<script src="{__GOUGU__}/third_party/echart/echarts.min.js"></script>
+	<script>
+		const moduleInit = ['tool','gouguEdit','gouguComment','gouguSchedule','employeepicker'];
+		function gouguInit() {	
+			get_logs();
+			get_view_data();
+		}
+
+		function setHour(num) {
+			var str = num + ':00';
+			if (num < 10) {
+				str = '0' + num + ':00';
+			}
+			return str;
+		}
+		var archiveCalendar = {};
+		function getRange() {
+			let today = new Date();
+			let tYear = today.getFullYear();
+			let tMonth = today.getMonth() + 1;
+			let tDate = today.getDate();
+			let dateFirst = tYear + "-" + tMonth + "-" + tDate;
+			let datelast = (tYear - 1) + "-" + tMonth + "-" + tDate;
+			let dataRange = [];
+			dataRange.push(dateFirst);
+			dataRange.push(datelast);
+			return dataRange;
+		}
+
+		function getDay() {
+			var today = new Date();
+			var dayArray = [];
+			for (var i = 0; i < 366; i++) {
+				var targetday_milliseconds = today.getTime() - 1000 * 60 * 60 * 24 * i;
+				var date = new Date(targetday_milliseconds);
+				dayArray.push(retunDay(date));
+			}
+			return dayArray;
+		}
+
+		function retunDay(day) {
+			var tYear = day.getFullYear();
+			var tMonth = day.getMonth();
+			var tDate = day.getDate();
+			tMonth = tMonth + 1;
+			if (tMonth.toString().length == 1) {
+				tMonth = "0" + tMonth;
+			}
+			if (tDate.toString().length == 1) {
+				tDate = "0" + tDate;
+			}
+			var dateStr = tYear + "-" + tMonth + "-" + tDate;
+			var dateArray = [];
+			dateArray.push(dateStr);
+			if (archiveCalendar[dateStr]) {
+				dateArray.push(archiveCalendar[dateStr]);
+			}
+			else {
+				dateArray.push(0);
+			}
+			return dateArray;
+		}
+
+		var chartView = echarts.init(document.getElementById('chartView'));
+		var chartYear = echarts.init(document.getElementById('chartYear'));
+		var logChart = echarts.init(document.getElementById('logChart'));
+		function get_view_data() {
+			$.ajax({
+				url: "/home/index/get_view_data",
+				type: 'get',
+				data: {},
+				success: function (e) {
+					if (e.code == 0) {
+						var data_first = e.data.data_first;
+						var data_second = e.data.data_second;
+						archiveCalendar = e.data.data_three;
+						var data_logs = e.data.data_logs;
+						var myDate = new Date();
+						var nowHour = myDate.getHours(); //获取当前小时数(0-23)
+						var xData = [];
+						var yData1 = [];
+						var yData2 = [];
+						var logItem = [];
+						$.each(data_first, function (key, value) {
+							if (key <= nowHour) {
+								yData1.push(value);
+							}
+						});
+
+						$.each(data_second, function (key, value) {
+							xData.push(setHour(key));
+							yData2.push(value);
+						});
+
+						$.each(data_logs, function (key, value) {
+							let item = {
+								value: value.count,
+								name: value.name
+							};
+							logItem.push(item);
+						});
+
+						let opsA = {
+							title: {
+								top: '12px',
+								text: '今日与昨日员工活跃度',
+								left: '8px',
+								textStyle: {
+									fontSize: '18',
+									color: '#333',
+								}
+							},
+							color: ["#1AAD19", "#1890FF"],
+							grid: {
+								left: '16px',
+								right: '30px',
+								bottom: '12px',
+								top: '60px',
+								containLabel: true
+							},
+							tooltip: {
+								trigger: 'axis',
+								axisPointer: {
+									type: 'cross',
+									crossStyle: {
+										color: '#999'
+									}
+								}
+							},
+							toolbox: {
+								show: true,
+							},
+							legend: {
+								data: ["今日", "昨日"],
+								top: '16px',
+							},
+							xAxis: [{
+								type: "category",
+								boundaryGap: !1,
+								data: xData,
+								axisLine: {
+									lineStyle: {
+										color: '#999999',
+										width: 1,
+									}
+								},
+							}],
+							yAxis: [{
+								type: "value",
+								axisLine: {
+									show: true,
+									lineStyle: {
+										color: '#999999',
+										width: 1,
+									}
+								},
+							}],
+							series: [{
+								name: "今日",
+								type: "line",
+								smooth: !0,
+								itemStyle: {
+									normal: {
+										areaStyle: {
+											type: "default",
+											opacity: 0.2
+										}
+									}
+								},
+								data: yData1
+							}, {
+								name: "昨日",
+								type: "line",
+								smooth: !0,
+								itemStyle: {
+									normal: {
+										areaStyle: {
+											type: "default",
+											opacity: 0.2
+										}
+									}
+								},
+								data: yData2
+							}]
+						}
+						chartView.setOption(opsA);
+
+						let opsB = {
+							title: {
+								top: '12px',
+								text: '近一年员工活跃度',
+								left: '8px',
+								textStyle: {
+									fontSize: '18',
+									color: '#333',
+								}
+							},
+							tooltip: {
+								padding: 6,
+								formatter: function (obj) {
+									var value = obj.value;
+									return '<div style="font-size: 12px;">' + value[0] + '员工活跃度：' + value[1] + '</div>';
+								}
+							},
+							visualMap: {
+								min: 0,
+								max: 300,
+								show: false,
+								inRange: {
+									color: ['#fafafa', '#1AAD19']
+								}
+							},
+							calendar: {
+								top: 72,
+								left: 52,
+								right: 20,
+								range: getRange(),
+								cellSize: ['auto', 21],
+								splitLine: {
+									lineStyle: {
+										color: '#aaa',
+										type: 'dashed'
+									}
+								},
+								itemStyle: {
+									borderWidth: 0.5
+								},
+								yearLabel: { show: false },
+								monthLabel: {
+									nameMap: 'cn',
+									fontSize: 12
+								},
+								dayLabel: {
+									show: true,
+									formatter: '{start}  1st',
+									fontWeight: 'lighter',
+									nameMap: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
+									fontSize: 12
+								}
+							},
+							series: [{
+								type: 'heatmap',
+								coordinateSystem: 'calendar',
+								calendarIndex: 0,
+								data: getDay()
+							}]
+						};
+						chartYear.setOption(opsB);
+
+
+						let optC = {
+							tooltip: {
+								trigger: 'item',
+								formatter: '{a} <br/>{b} :{d}%'
+							},
+							legend: {
+								top: '1%',
+								left: 'center'
+							},
+							series: [
+								{
+									name: '活跃度',
+									type: 'pie',
+									radius: '50%',
+									center: ['50%', '60%'],
+									data: logItem,
+									emphasis: {
+										itemStyle: {
+											shadowBlur: 10,
+											shadowOffsetX: 0,
+											shadowColor: 'rgba(0, 0, 0, 0.5)'
+										}
+									}
+								}
+							]
+						};
+						logChart.setOption(optC);
+					}
+				}
+			})
+		}
+
+		window.onresize = function () {
+			chartView.resize();
+			chartYear.resize();
+			logChart.resize();
+		}
+
+		//获取工作记录
+		function get_logs() {
+			$.ajax({
+				url: "/home/index/log_list",
+				type: 'get',
+				data: {
+					page: 1,
+					limit: 15
+				},
+				success: function (e) {
+					if (e.code == 0) {
+						var html = '';
+						$.each(e.data, function (key, value) {
+							html += `<li class="layui-timeline-item">
+								<i class="layui-icon layui-timeline-axis"></i>
+								<div class="layui-timeline-content layui-text">
+									 <div class="layui-timeline-title"><span title="${value.id}">${value.times}</span>，${value.content}</div>
+								</div>
+							</li>`;
+						});
+						$('#logs').html(html);
+					}
+				}
+			})
+		}
+	</script>
+	<!-- /脚本 -->
+	{/block}

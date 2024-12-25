@@ -1,0 +1,185 @@
+<form class="layui-form page-content p-4">
+	{eq name="id" value ="0"}
+	<h3 class="h3-title">新建文档</h3>
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">文档名称<font>*</font></td>
+			<td><input type="text" name="title" lay-verify="required" lay-reqText="请输入文档名称" placeholder="请输入文档名称" class="layui-input" value=""></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray-2" style="text-align:left" colspan="2"><strong>文档附件</strong> <button type="button" class="layui-btn layui-btn-xs" id="flieBtn">文档上传</button></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<table class="layui-table layui-table-form">
+					<thead>
+						<tr>
+							<th width="80%">文件名</th>
+							<th width="20%" style="text-align:center">操作</th>
+						</tr>
+					</thead>
+					<tbody id="flieList">
+						<tr class="tr-none">
+							<td colspan="2" style="padding:10px 0; color:#999; text-align:center;">暂无文档附件</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray-2" style="text-align:left" colspan="2"><strong>文档内容</strong></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div>
+					<textarea id="mdContent" style="display:none;"></textarea>
+					<div id="docContent"></div>
+				</div>
+				<input type="hidden" name="id" value="0" />
+				<input type="hidden" name="topic_id" value="{$project_id}" />
+			</td>
+		</tr>
+	</table>
+	{else/}
+	<h3 class="h3-title">编辑文档</h3>
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">文档名称<font>*</font>
+			</td>
+			<td>
+				<input type="text" name="title" lay-verify="required" lay-reqText="请输入文档名称" placeholder="请输入文档名称" class="layui-input" value="{$detail.title}">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray-2" style="text-align:left" colspan="2"><strong>文档附件</strong> <button type="button" class="layui-btn layui-btn-xs" id="flieBtn">文档上传</button></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<table class="layui-table layui-table-form">
+					<thead>
+						<tr>
+							<th width="80%">文件名</th>
+							<th width="20%" style="text-align:center">操作</th>
+						</tr>
+					</thead>
+					<tbody id="flieList">
+						{empty name="$detail.file_array" }
+						<tr class="tr-none">
+							<td colspan="2" style="padding:10px 0; color:#999; text-align:center;">暂无文档附件</td>
+						</tr>
+						{else/}
+						{volist name="$detail.file_array" id="vo"}
+						<tr class="file-tr" data-id="{$vo.id}">
+							<td>{$vo.name}</td>
+							<td style="text-align: center;">
+								<div class="layui-btn-group"><a class="layui-btn layui-btn-xs" href="{$vo.filepath}" download="{$vo.name}" data-id="{$vo.id}">下载</a><span class="layui-btn layui-btn-xs layui-btn-danger file-delete" data-uid="{$vo.admin_id}" data-id="{$vo.id}">删除</span>
+								</div>
+							</td>
+						</tr>
+						{/volist}
+						{/empty}
+					</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray-2" style="text-align:left" colspan="2"><strong>文档内容</strong></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div>
+					<div id="docContent"></div>
+					<textarea id="mdContent" style="display:none;">{$detail.md_content}</textarea>
+				</div>
+				<input type="hidden" name="id" value="{$detail.id}" />
+			</td>
+		</tr>
+	</table>
+	{/eq}
+	<div style="padding: 10px 0 0">
+		<input type="hidden" name="module" value="project" />
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	</div>
+</form>
+
+<script>
+	function openInit() {
+		var form = layui.form, layer = layui.layer, tool = layui.tool,editor = layui.editormd,upload = layui.upload;
+		upload.render({
+			elem: '#flieBtn'
+			, url: '/api/index/upload'
+			, accept: 'file' //普通文件
+			, exts: 'jpeg|jpg|png|gif|doc|docx|ppt|pptx|xls|xlsx|pdf|zip|rar|7z' //只允许上传文件
+			, before: function (obj) {
+				layer.msg('上传中...', { time: 3600000 });
+			}
+			, done: function (res, index, upload) {
+				console.log(res);
+				let vo = res.data;
+				let tr='<tr class="file-tr" data-id="'+vo.id+'">\
+						<td>'+vo.name+'</td>\
+						<td style="text-align: center;">\
+							<div class="layui-btn-group"><a class="layui-btn layui-btn-xs" href="'+vo.filepath+'" download="'+vo.name+'">下载</a><span class="layui-btn layui-btn-xs layui-btn-danger file-delete" data-uid="'+vo.admin_id+'">删除</span>\
+							</div>\
+						</td>\
+					</tr>';
+				$('#flieList').append(tr).find('.tr-none').remove();
+				layer.msg('上传成功');
+			}
+			, error: function (index, upload) {
+				layer.msg('上传失败');
+			}
+		});
+
+		$('#flieList').on('click', '.file-delete', function () {
+			let that = $(this);
+			layer.confirm('确定要删除该文件吗?', { icon: 3, title: '提示' }, function (index) {
+				layer.closeAll();
+				that.parent().parent().parent().remove();
+				if($('#flieList').find('tr').length== 0){
+					$('#flieList').append('<tr class="tr-none"><td colspan="2" style="padding:10px 0; color:#999; text-align:center;">暂无文档附件</td></tr>');
+				}
+			});
+		})
+
+		form.render();
+		var edit = editor.render('docContent', {
+			markdown: $('#mdContent').val(),
+			imageUploadURL: "/api/index/md_upload",
+			lineNumbers: false,
+			toolbarIcons: function () {
+				return [
+					"undo", "redo","bold", "del", "italic", "quote","h1", "h2", "h3", "h4", "h5",
+					"list-ul", "list-ol", "hr","link", "reference-link", "image", "code", "code-block", "table","watch", "fullscreen"
+				];
+			},
+			height: window.innerHeight - 360,
+		});
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					if(layui.documentTable){
+						layui.documentTable.reload();
+					}
+					tool.close(1000);
+				}
+			}
+			let files = [];
+			$('#flieList').find('.file-tr').each(function(index, element) {
+				files.push($(element).data('id'));
+			});
+			data.field['file_ids'] = files.join(',');
+			console.log(data.field);
+			if(data.field['file_ids']=='' && data.field['docContent-html-code']==''){
+				layer.msg('文档附件或者文档内容至少完善一项');
+				return false;
+			}
+			tool.post("/api/document/add", data.field, callback);
+			return false;
+		});
+	}
+
+</script>

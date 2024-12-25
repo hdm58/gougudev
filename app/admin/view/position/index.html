@@ -1,0 +1,122 @@
+{extend name="../../base/view/common/base" /}
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+	<a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+	<a href="/home/user/setting">信息设置</a>
+	<a><cite>岗位职称</cite></a>
+</span>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="main-content">
+	{include file="../../base/view/common/submenu" /}
+	<div class="main-page-content">
+		<div class="layui-form-bar">
+			<button class="layui-btn layui-btn-sm add">+ 添加岗位</button>
+		</div>
+		<table class="layui-hide" id="test" lay-filter="test"></table>
+	</div>
+</div>
+<script type="text/html" id="status">
+	<i class="layui-icon {{#  if(d.status == 1){ }}layui-icon-ok{{#  } else { }}layui-icon-close{{#  } }}"></i>
+</script>
+<script type="text/html" id="barDemo">
+<div class="layui-btn-group"><button class="layui-btn layui-btn-xs layui-btn-normal" lay-event="view">详情</button><button class="layui-btn layui-btn-xs" lay-event="edit">编辑</button><button class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</button></div>
+</script>
+
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+const moduleInit = ['tool'];
+	function gouguInit() {
+		var layer = layui.layer,
+			tool = layui.tool,
+			table = layui.table;
+		layui.pageTable = table.render({
+			elem: '#test',
+			title: '岗位列表',
+			url: "/admin/position/index", //数据接口				
+			page: false, //开启分页
+			cols: [
+				[
+					{
+						field: 'id',
+						title: 'ID号',
+						align: 'center',
+						width: 80
+					}, {
+						field: 'title',
+						title: '岗位名称',
+						align: 'center',
+						width: 120
+					}, {
+						field: 'groupName',
+						title: '权限角色',
+						width: 200
+					}, {
+						field: 'remark',
+						title: '备注'
+					}, {
+						field: 'work_price',
+						title: '岗位工时单价(元)',
+						align: 'center',
+						width: 132
+					}, {
+						field: 'status',
+						title: '状态',
+						toolbar: '#status',
+						align: 'center',
+						width: 60
+					}, {
+						field: 'right',
+						title: '操作',
+						toolbar: '#barDemo',
+						width: 132,
+						align: 'center'
+					}
+				]
+			]
+		});
+
+		//表头工具栏事件
+		$('.add').on('click', function () {
+			tool.open('/admin/position/add');
+		});
+		//监听行工具事件
+		table.on('tool(test)', function (obj) {
+			var data = obj.data;
+			if (obj.event === 'view') {
+				tool.open('/admin/position/view?id=' + data.id);
+				return;
+			}
+			if (obj.event === 'edit') {
+				tool.open('/admin/position/add?id=' + data.id);
+				return;
+			}
+			if (obj.event === 'del') {
+				if (data.id == 1) {
+					layer.msg('超级岗位不能删除');
+					return;
+				}
+				layer.confirm('您确定要删除该岗位', {
+					icon: 3,
+					title: '提示'
+				}, function (index) {
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							obj.del();
+						}
+					}
+					tool.delete("/admin/position/delete", { id: obj.data.id }, callback);
+					layer.close(index);
+				});
+			}
+		});
+	}
+</script>
+{/block}
+<!-- /脚本 -->

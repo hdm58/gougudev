@@ -1,0 +1,120 @@
+{extend name="../../base/view/common/base" /}
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+	<a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+	<a href="/home/user/setting">信息设置</a>
+	<a><cite>编辑个人信息</cite></a>
+</span>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="main-content">
+	{include file="../../base/view/common/submenu" /}
+	<div class="main-page-content">
+		<form class="layui-form p-4">
+			<h3 class="h3-title">编辑个人信息</h3>
+			<table class="layui-table layui-table-form">
+				<tr>
+					<td class="layui-td-gray">用户名</td>
+					<td>{$admin.username}</td>
+					<td class="layui-td-gray">姓名</td>
+					<td>{$admin.name}</td>
+					<td class="layui-td-gray">性别</td>
+					<td>
+						<input type="radio" name="sex" value="1" title="男" {eq name="$admin.sex" value="1" }
+							checked{/eq}>
+						<input type="radio" name="sex" value="2" title="女" {eq name="$admin.sex" value="2" }
+							checked{/eq}>
+					</td>
+					<td class="layui-td-gray" rowspan="3">头像</td>
+					<td rowspan="3">
+						<div class="layui-upload">
+							<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" id="test1">上传头像</button>
+							<div class="layui-upload-list" id="demo1">
+								<img src="{$admin.thumb}" width="72" />
+								<input type="hidden" name="thumb" value="{$admin.thumb}">
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td class="layui-td-gray">手机号码</td>
+					<td>{$admin.mobile}</td>
+					<td class="layui-td-gray">电子邮箱</td>
+					<td>{$admin.email}</td>
+					<td class="layui-td-gray">入职日期</td>
+					<td>
+						{$admin.entry_time | date='Y-m-d'}
+					</td>
+				</tr>
+				<tr>
+					<td class="layui-td-gray">所在部门</td>
+					<td>{$admin.department}</td>
+					<td class="layui-td-gray">岗位职称</td>
+					<td>{$admin.position}</td>
+					<td class="layui-td-gray">员工类型</td>
+					<td>
+						{eq name="$admin.type" value="3"}<span style="color:#5FB878">实 习 生</span>{/eq}
+						{eq name="$admin.type" value="2"}<span style="color:#01AAED">试用员工</span>{/eq}
+						{eq name="$admin.type" value="1"}<span style="color:#393D49">正式员工</span>{/eq}
+					</td>
+				</tr>
+				<tr>
+					<td class="layui-td-gray">个人简介</td>
+					<td colspan="7">
+						<textarea name="desc" placeholder="请输入个人简介" class="layui-textarea">{$admin.desc|default=""}</textarea>
+					</td>
+				</tr>
+			</table>
+			<div style="padding: 10px 0">
+				<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+	</div>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	const moduleInit = ['tool'];
+	function gouguInit() {
+		var form = layui.form,
+			layer = layui.layer,
+			upload = layui.upload;
+
+		//头像上传
+		var uploadInst = upload.render({
+			elem: '#test1',
+			url: "/api/index/upload",
+			done: function (e) {
+				//如果上传失败
+				if (e.code == 1) {
+					return layer.msg('上传失败');
+				}
+				else {
+					//上传成功
+					$('#demo1 input').attr('value', e.data.filepath);
+					$('#demo1 img').attr('src', e.data.filepath);
+				}
+			}
+		});
+
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			$.ajax({
+				url: "/home/user/edit_personal",
+				type: 'post',
+				data: data.field,
+				success: function (e) {
+					layer.msg(e.msg);
+				}
+			})
+			return false;
+		});
+	}
+</script>
+{/block}
+<!-- /脚本 -->

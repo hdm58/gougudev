@@ -1,0 +1,316 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.layui-tree-set .layui-tree-txt.on,.layui-tree-set .layui-tree-txt.on:hover{font-weight:800; color:#1E9FFF}
+.layui-tree-txt{display:inline-block; width:132px; overflow:hidden;}
+.layui-tree-iconClick{margin-right:3px;}
+.tree-left{width:268px; float:left; height:calc(100% - 22px); overflow-y: scroll; overflow-x: hidden; border-right:1px solid #e5ecf0; background-color:#fff; padding:12px 10px 10px 5px;}
+.tree-left h3{font-size:16px; height:30px; padding-left:10px; font-weight:800}
+.editormd-code-toolbar select{display:inline;}
+.editormd{margin-bottom:0}
+.layui-table td{border-color:#e5ecf0}
+.editormd li{list-style: inherit;}
+</style>
+{/block}
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+  <a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+  <a href="/knowledge/index/index">知识库</a>
+  <a><cite>编辑知识</cite></a>
+</span>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="table-content" style="height:100%">
+	<div class="tree-left">
+		<h3>知识库目录</h3>
+		<div id="tree"></div>
+	</div>
+	<div class="body-table pt-3 pr-3" style="margin-left:296px;">
+		<form class="layui-form">
+			<table class="layui-table" style="margin-bottom:0;">
+				<tr>
+					<td class="layui-td-gray">标题 <span style="color: red">*</span></td>
+					<td><input type="text" value="{$detail.title}" name="title" lay-verify="required" lay-reqText="请输入标题" autocomplete="off" placeholder="请输入标题" class="layui-input"></td>
+					<td class="layui-td-gray">上级目录<span style="color: red">*</span></td>
+					<td>
+					<select name="pid">
+						<option value="0">请选择顶级目录</option>
+						{volist name=":set_recursion(knowledge_doc($detail.knowledge_id))" id="v"}
+						<option value="{$v.id}" {eq name="$v.id" value="$detail.pid"} selected{/eq}>{$v.title}</option>
+						{/volist}
+					</select>				
+					</td>
+					<td class="layui-td-gray">排序<span style="color: red">*</span></td>
+					<td style="width:80px; text-align:center"><input type="text" name="sort" value="0" value="{$detail.sort}" placeholder="请输入排序，数字" autocomplete="off" class="layui-input"></td>
+				</tr>
+				{eq name="$detail.type" value="1"}
+				<tr>
+					<td class="layui-td-gray">文档附件<br><button type="button" class="layui-btn layui-btn-xs" id="flieBtn">文档上传</button></td>
+					<td colspan="5">
+						<table class="layui-table layui-table-form">
+							<thead>
+								<tr>
+									<th width="80%">文件名</th>
+									<th width="20%" style="text-align:center">操作</th>
+								</tr>
+							</thead>
+							<tbody id="flieList">
+								{empty name="$detail.file_array" }
+								<tr class="tr-none">
+									<td colspan="2" style="padding:10px 0; color:#999; text-align:center;">暂无文档附件</td>
+								</tr>
+								{else/}
+								{volist name="$detail.file_array" id="vo"}
+								<tr class="file-tr" data-id="{$vo.id}">
+									<td>{$vo.name}</td>
+									<td style="text-align: center;">
+										<div class="layui-btn-group"><a class="layui-btn layui-btn-xs" href="{$vo.filepath}" download="{$vo.name}" data-id="{$vo.id}">下载</a><span class="layui-btn layui-btn-xs layui-btn-danger file-delete" data-uid="{$vo.admin_id}" data-id="{$vo.id}">删除</span>
+										</div>
+									</td>
+								</tr>
+								{/volist}
+								{/empty}
+							</tbody>
+						</table>
+					</td>
+				</tr>
+				{/eq}
+				{eq name="$detail.type" value="3"}
+				<tr>
+					<td class="layui-td-gray">跳转链接 <span style="color: red">*</span></td>
+					<td colspan="5">
+						<input type="text" value="{$detail.link}" name="link" lay-verify="required" lay-reqText="请输入标题" autocomplete="off" placeholder="请输入标题" class="layui-input">
+					</td>
+				</tr>
+				{/eq}
+			</table>
+			{eq name="$detail.type" value="1"}
+			<h5 class="my-3">文档内容</h5>
+			<div>
+				<textarea id="mdContent" style="display:none;">{$detail.md_content|raw}</textarea>
+				<div id="docContent"></div>
+			</div>
+			{/eq}
+			<div class="mt-4">
+				<input type="hidden" name="id" value="{$id}">
+				<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">提交保存</button>
+				<button lay-event="back" class="layui-btn layui-btn-primary">返回目录</button>
+			</div>
+		</form>
+	</div>
+</div>
+</div>
+{/block}
+<!-- 脚本 -->
+{block name="script"}
+<script>
+const moduleInit = ['tool','editormd'];
+function gouguInit() {
+    var form = layui.form,table = layui.table,tool = layui.tool,tree = layui.tree,layer = layui.layer,upload = layui.upload,editor = layui.editormd;
+	var doc_id = '{$detail.id}';
+	var knowledge_id = '{$detail.knowledge_id}';
+
+	upload.render({
+		elem: '#flieBtn'
+		, url: '/api/index/upload'
+		, accept: 'file' //普通文件
+		, exts: 'jpeg|jpg|png|gif|doc|docx|ppt|pptx|xls|xlsx|pdf|zip|rar|7z' //只允许上传文件
+		, before: function (obj) {
+			layer.msg('上传中...', { time: 3600000 });
+		}
+		, done: function (res, index, upload) {
+			console.log(res);
+			let vo = res.data;
+			let tr='<tr class="file-tr" data-id="'+vo.id+'">\
+					<td>'+vo.name+'</td>\
+					<td style="text-align: center;">\
+						<div class="layui-btn-group"><a class="layui-btn layui-btn-xs" href="'+vo.filepath+'" download="'+vo.name+'">下载</a><span class="layui-btn layui-btn-xs layui-btn-danger file-delete" data-uid="'+vo.admin_id+'">删除</span>\
+						</div>\
+					</td>\
+				</tr>';
+			$('#flieList').append(tr).find('.tr-none').remove();
+			layer.msg('上传成功');
+		}
+		, error: function (index, upload) {
+			layer.msg('上传失败');
+		}
+	});
+
+	$('#flieList').on('click', '.file-delete', function () {
+		let that = $(this);
+		layer.confirm('确定要删除该文件吗?', { icon: 3, title: '提示' }, function (index) {
+			layer.closeAll();
+			that.parent().parent().parent().remove();
+			if($('#flieList').find('tr').length== 0){
+				$('#flieList').append('<tr class="tr-none"><td colspan="2" style="padding:10px 0; color:#999; text-align:center;">暂无文档附件</td></tr>');
+			}
+		});
+	})
+
+	if($('#docContent').length>0){
+		var edit = editor.render('docContent', {
+			markdown: $('#mdContent').val(),
+			imageUploadURL: "/api/index/md_upload",
+			height:window.innerHeight-320
+		});
+	}
+	
+	var treeRender = function(res){
+		//仅节点左侧图标控制收缩
+		tree.render({
+			elem: '#tree',
+			data: res.trees,
+			spread: true,
+			id: 'book',
+			edit: ['add', 'del'], //操作节点的图标
+			onlyIconControl: true,  //是否仅允许节点左侧图标控制展开收缩
+			click: function(obj){
+				//layer.msg(JSON.stringify(obj.data));
+				window.location.href='/knowledge/index/doc_add?id='+obj.data.id;
+			},
+			operate: function(obj){
+				let type = obj.type; //得到操作类型：add、edit、del
+				let data = obj.data; //得到当前节点的数据
+				let elem = obj.elem; //得到当前节点元素					
+				if(type === 'add'){ //增加节点
+				  add(obj.data.id);
+				} else if(type === 'update'){ //修改节点
+				 // console.log(elem.find('.layui-tree-txt').html()); //得到修改后的内容
+				} else if(type === 'del'){ //删除节点				
+					let deletecallback = function (e) {
+						layer.msg(e.msg);
+						setTimeout(function(){							
+							$('#tree').find('.layui-tree-txt').eq(0).click();
+						},1000)	
+					}
+					tool.delete("/knowledge/index/doc_delete",{ id: obj.data.id },deletecallback);
+				};
+			}
+		});	
+		setTimeout(function(){
+			$('[data-id="'+doc_id+'"]').find('.layui-tree-txt').eq(0).addClass('on');
+		},100)	
+	}
+	tool.get("/api/index/get_doc_list",{kid:knowledge_id,tree:1},treeRender);	
+	
+    //监听提交
+    form.on('submit(webform)', function (data) {
+		let callback = function(e){
+			layer.msg(e.msg);
+			if(e.code == 0){
+				setTimeout(function(){							
+					window.location.href='/knowledge/index/?kid='+knowledge_id;
+				},1000)						  
+			}
+		}
+		let files = [];
+		$('#flieList').find('.file-tr').each(function(index, element) {
+			files.push($(element).data('id'));
+		});
+		data.field['file_ids'] = files.join(',');
+		tool.post('/knowledge/index/doc_add',data.field,callback);
+		return false;
+    });
+    //监听返回
+    $('.body-table').on('click', '[lay-event="back"]', function () {
+		window.location.href='/knowledge/index/?kid='+knowledge_id;
+		return false;
+    });
+	
+	//添加
+	var selectTable=null;
+	function add(pid) {
+		var type=[{'id':1,'title':'新建文档'},{'id':2,'title':'新建目录'},{'id':3,'title':'新建链接'}];
+		layer.open({
+			title:'选择节点类型',
+			type:1,
+			area:['360px','300px'],
+			content:'<div style="width:328px; padding:15px 15px 0"><div id="selectType"></div></div>',
+			success:function(){
+				selectTable=table.render({
+					elem: '#selectType',
+					cols: [[ //标题栏
+						{type:'radio',title: '选择'},
+						{field: 'title', title: '节点类型'}
+					]],
+					data: type
+				  });			
+			},
+			btn:['确定'],
+			btnAlign:'c',
+			yes: function(idx){
+				let checkStatus = table.checkStatus(selectTable.config.id);
+				let data = checkStatus.data;
+				if(data.length>0){
+					if(data[0].id==1 || data[0].id==2){
+						layer.prompt({title: '标题', formType: 3,value :''}, function(text, index){
+							if(text == ''){
+								layer.msg('输入标题');
+								return false;
+							}
+							let postData = {knowledge_id:knowledge_id,pid:pid,type:data[0].id,title:text}
+							let callback = function(e){
+								layer.msg(e.msg);
+								if(e.code == 0){
+									setTimeout(function(){							
+										window.location.href='/knowledge/index/doc_add/id/'+e.data;
+									},1000)						  
+								}
+							}
+							tool.post('/knowledge/index/doc_add',postData,callback);									
+						})
+					}else if(data[0].id==3){
+						var content='<div style="padding:0 15px;"><table class="layui-table">\
+							<tr>\
+								<td class="layui-td-gray">链接标题 <span style="color: red">*</span></td>\
+								<td><input name="title" id="docTitle" class="layui-input" value="" placeholder="请输入标题"></td>\
+							</tr>\
+							<tr>\
+								<td class="layui-td-gray">URL链接 <span style="color: red">*</span></td>\
+								<td><input name="link" id="docLink" class="layui-input" value="" placeholder="请输入链接"></td>\
+							</tr>\
+						</table></div>';
+						layer.open({
+							type:1,
+							title:'新建链接',
+							area:['480px','300px'],
+							content:content,
+							btn: ['确定提交'],
+							btnAlign:'c',
+							yes: function(idx){
+								let docTitle = $('#docTitle').val();
+								let docLink = $('#docLink').val();
+								if(docTitle==''){
+									layer.msg('请输入标题');
+									return;
+								}
+								if(docLink==''){
+									layer.msg('请输入链接');
+									return;
+								}
+								let postData = {knowledge_id:knowledge_id,pid:pid,type:data[0].id,title:docTitle,link:docLink}
+								let callback = function(e){
+									layer.msg(e.msg);
+									if(e.code == 0){
+										setTimeout(function(){							
+											window.location.href='/knowledge/index/doc_add/id/'+e.data;
+										},1000)						  
+									}
+								}
+								tool.post('/knowledge/index/doc_add',postData,callback);			
+							}
+						})	
+					}
+				}
+				else{
+					layer.msg('请选择节点类型');
+					return false;
+				}
+			}
+		})	
+	}
+}
+</script>
+{/block}
+<!-- /脚本 -->

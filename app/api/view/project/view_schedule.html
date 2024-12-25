@@ -1,0 +1,68 @@
+<div class="table-content" id="scheduleList">
+	<div class="layui-form-bar border-t border-x">
+		<form class="layui-form">
+			<div class="layui-input-inline" style="width:110px;">
+				<input type="text" name="username" placeholder="请选择员工" class="layui-input picker-one" readonly />
+				<input type="text" name="uid" value="" style="display:none" />
+			</div>
+			<div class="layui-input-inline" style="width:220px;">
+				<input type="text" name="keywords" placeholder="输入工作内容" class="layui-input" />
+			</div>
+			<div class="layui-input-inline" style="width:160px;">
+				<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="searchform"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+				<button type="reset" class="layui-btn layui-btn-reset" lay-filter="reset">清空</button>
+			</div>
+		</form>
+	</div>
+	<table class="layui-hide" id="scheduleApi" lay-filter="schedule"></table>
+</div>
+<script>
+	function pageInit() {
+		var table = layui.table, form = layui.form, tool = layui.tool, employeepicker = layui.employeepicker, schedule = layui.gouguSchedule;
+
+		layui.scheduleTable = table.render({
+			elem: '#scheduleApi',
+			title: '工作记录列表',
+			cellMinWidth: 80,
+			url: "/api/schedule/index", //数据接口
+			where: { 'project_id': project_id },
+			page: true, //开启分页
+			limit: 20,
+			cols: [[ //表头
+				{ field: 'id', title: '序号', width: 80, align: 'center' }
+				, {
+					field: 'start_time', title: '工作时间范围', align: 'center', width: 186, templet: function (d) {
+						var html = d.start_time + '至' + d.end_time;
+						return html;
+					}
+				}
+				, { field: 'labor_time', title: '工时', style: 'color: #91CC75;', align: 'center', width: 60 }
+				, { field: 'work_cate', title: '工作类型', align: 'center', width: 100 }
+				, { field: 'title', title: '工作内容', minWidth: 240}
+				, { field: 'name', title: '执行员工', align: 'center', width: 80 }
+				, { field: 'department', title: '所在部门', align: 'center', width: 100 }
+				, { field: 'create_time', title: '记录时间', align: 'center', width: 150 }
+				, {title: '操作',fixed:'right', align: 'center', width: 100, templet: function (d) {
+						return '<div class="layui-btn-group"><span class="layui-btn layui-btn-xs" lay-event="edit">修改</span><span class="layui-btn layui-btn-normal layui-btn-xs" lay-event="view">详细</span></div>';
+					}
+				}
+			]]
+		});
+
+		//监听搜索提交
+		form.on('submit(searchform)', function (data) {
+			layui.scheduleTable.reload({ where: data.field, page: { curr: 1 } });
+			return false;
+		});
+		//监听行工具事件		
+		table.on('tool(schedule)', function (obj) {
+			if (obj.event === 'edit') {
+				schedule.add(0, obj.data);
+			}
+			if (obj.event === 'view') {
+				schedule.view(obj.data);
+			}
+			return false;
+		})
+	}		
+</script>

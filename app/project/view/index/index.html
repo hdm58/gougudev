@@ -1,0 +1,127 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+	<a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+	<a><cite>项目中心</cite></a>
+</span>
+{/block}
+{block name="body"}
+<div class="table-content p-3">
+	<div class="layui-form-bar border-t border-x">
+		<form id="taskForm" class="layui-form">
+			<div class="layui-input-inline" style="width:100px;">
+				<select name="status" lay-filter="status">
+					<option value="">项目状态</option>
+					<option value="1">未开始</option>
+					<option value="2">进行中</option>
+					<option value="3">已完成</option>
+					<option value="4">已关闭</option>
+				</select>
+			</div>
+			<div class="layui-input-inline" style="width:120px;">
+				<input type="text" name="director" placeholder="负责人" readonly class="layui-input picker-admin" autocomplete="off" />
+				<input name="director_uid" style="display: none;" value="" />
+			</div>
+			<div class="layui-input-inline" style="width:120px;">
+				<input type="text" name="assist_admin" placeholder="项目成员" readonly class="layui-input picker-admin" autocomplete="off" />
+				<input name="assist_admin_ids" style="display: none;" value="" />
+			</div>
+			<div class="layui-input-inline" style="width:300px;">
+				<input type="text" class="layui-input" id="diff_time" placeholder="到期查询" readonly name="diff_time">
+			</div>
+			<div class="layui-input-inline" style="width:100px;">
+				<select name="is_delay">
+					<option value="">逾期查询</option>
+					<option value="1">未逾期</option>
+					<option value="2">已逾期</option>
+				</select>
+			</div>
+			<div class="layui-input-inline" style="width:240px;">
+				<input type="text" name="keywords" placeholder="主题/描述内容" class="layui-input" autocomplete="off" />
+			</div>
+			<input type="hidden" name="type" />
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="searchform">搜索</button>
+			<button type="reset" class="gougu-clear" lay-filter="clear">清空</button>
+		</form>
+	</div>
+	<table class="layui-hide" id="projectList" lay-filter="project"></table>
+</div>
+
+<script type="text/html" id="toolbarDemo">
+  <div class="layui-btn-container">
+  	<button class="layui-btn layui-btn-sm" lay-event="add">+ 新建项目</button>
+  </div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	const moduleInit = ['tool','gouguEdit','gouguComment','gouguSchedule','employeepicker','editormd','laydatePlus','oaPicker'];
+	function gouguInit() {
+		var form = layui.form,table = layui.table, tool = layui.tool,oaPicker = layui.oaPicker,  laydatePlus = layui.laydatePlus;
+		var diff_time = new laydatePlus({'target':'diff_time'});
+		layui.pageTable = table.render({
+			elem: '#projectList',
+			title: '项目列表',
+			toolbar: '#toolbarDemo',
+			cellMinWidth: 80,
+			page: true, //开启分页
+			limit: 20,
+			height: 'full-138',
+			url: "/project/index/index", //数据接口
+			cols: [[
+				{
+					field: 'id', title: '项目编号', width: 80, align: 'center', fixed: 'left', rowspan: 2, templet: function (d) {
+						return 'M' + d.id;
+					}
+				}
+				, {
+					field: 'status', title: '状态', align: 'center', width: 70, rowspan: 2, templet: function (d) {
+						var html = '<span class="layui-btn layui-btn-xs bg-status-' + d.status + '">' + d.status_name + '</span>';
+						return html;
+					}
+				}
+				, {
+					field: 'name', title: '项目名称',minWidth: 240, rowspan: 2, templet: function (d) {
+						var html = '<a class="link-a" data-href="/project/index/view/id/' + d.id + '">' + d.name + '</a>';
+						return html;
+					}
+				}
+				, { field: 'director_name', title: '负责人', align: 'center', width: 80, rowspan: 2 }
+				, { field: 'plan_time', title: '项目周期', align: 'center', width: 190, rowspan: 2 }
+				, { align: 'center', title: '关联任务', colspan: 3 }
+				, { align: 'center', title: 'BUG缺陷', colspan: 3 }
+			], [
+				{ field: 'tasks_a_unfinish', align: 'center', style: 'color: #91CC75;', width: 72, 'title': '进行中' }
+				, { field: 'tasks_a_finish', align: 'center', style: 'color: #FAC858;', width: 70, 'title': '已完成' }
+				, { field: 'tasks_a_pensent', align: 'center', style: 'color: #EE6666;', width: 72, 'title': '完成率' }
+				, { field: 'tasks_b_unfinish', align: 'center', style: 'color: #91CC75;', width: 72, 'title': '进行中' }
+				, { field: 'tasks_b_finish', align: 'center', style: 'color: #FAC858;', width: 72, 'title': '已完成' }
+				, { field: 'tasks_b_pensent', align: 'center', style: 'color: #EE6666;', width: 72, 'title': '修复率' }
+			]]
+		});
+
+		table.on('toolbar(project)', function(obj){
+			if(obj.event === 'add'){
+				tool.open('/project/index/add');
+				return;
+			}
+		});
+		
+		//监听搜索提交
+		form.on('submit(searchform)', function (data) {
+			layui.pageTable.reload({ where: data.field});
+			return false;
+		});
+		$('#taskForm').on('click', '[lay-filter="clear"]', function () {
+			setTimeout(function () {
+				$('[lay-filter="searchform"]').click();
+			}, 10)
+		})
+	}		
+</script>
+{/block}
+<!-- /脚本 -->

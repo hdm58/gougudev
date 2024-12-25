@@ -1,0 +1,192 @@
+{extend name="../../base/view/common/base" /}
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+	<a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+	<a><cite>信息设置</cite></a>
+</span>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="main-content" style="min-height:100%; height:auto;">
+	<div class="sub-menu" style="width: 200px;">
+		{include file="../../base/view/common/submenu" /}
+		<div class="menu-bar">
+			<div class="menu-bar-content">
+				<div class="line"></div>
+			</div>
+		</div>
+	</div>
+	<div class="main-bg-content pb-4">
+		<div class="layui-card">
+			<div class="table-title">个人信息</div>
+			<div class="layui-card-body">
+				<table class="layui-table layui-table-form">
+					<tr>
+						<td class="layui-td-gray">用户名</td>
+						<td>{$admin.username}</td>
+						<td class="layui-td-gray">姓名</td>
+						<td>{$admin.name}</td>
+						<td class="layui-td-gray">性别</td>
+						<td>
+							{eq name="$admin.sex" value="1"}男{/eq}
+							{eq name="$admin.sex" value="2"}女{/eq}
+						</td>
+						<td class="layui-td-gray" rowspan="3">头像</td>
+						<td rowspan="3">
+							<img src="{$admin.thumb}" width="90" />
+						</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray">手机号码</td>
+						<td>{$admin.mobile}</td>
+						<td class="layui-td-gray">电子邮箱</td>
+						<td>{$admin.email}</td>
+						<td class="layui-td-gray">入职日期</td>
+						<td>
+							{$admin.entry_time | date='Y-m-d'}
+						</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray">所在部门</td>
+						<td>{$admin.department}</td>
+						<td class="layui-td-gray">岗位职称</td>
+						<td>{$admin.position}</td>
+						<td class="layui-td-gray">员工类型</td>
+						<td>
+							{eq name="$admin.type" value="3"}<span style="color:#5FB878">实 习 生</span>{/eq}
+							{eq name="$admin.type" value="2"}<span style="color:#01AAED">试用员工</span>{/eq}
+							{eq name="$admin.type" value="1"}<span style="color:#393D49">正式员工</span>{/eq}
+						</td>
+						
+					</tr>
+					<tr>
+						<td class="layui-td-gray">个人简介</td>
+						<td colspan="7">
+							{$admin.desc|default=""}
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+
+		<div class="layui-card">
+			<div class="table-title">系统信息</div>
+			<div class="layui-card-body">
+				<table class="layui-table">
+					<tr>
+						<td class="layui-td-gray">系统名称</td>
+						<td>
+							{notempty name="$config.admin_title"}{$config.admin_title}{/notempty}
+						</td>
+						<td rowspan="3" class="layui-td-gray-2">LOGO</td>
+						<td rowspan="3" style="width: 240px;">
+							<div class="layui-upload" style="width: 240px;">
+								<img src='{notempty name="$config.logo"}{$config.logo}{/notempty}'
+									style="max-width: 100%; width: 100%;" />
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray">网站域名</td>
+						<td>
+							{notempty name="$config.domain"}{$config.domain}{/notempty}
+						</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray">网站名称</td>
+						<td>
+							{notempty name="$config.title"}{$config.title}{/notempty}
+						</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray">ICP备案号</td>
+						<td>
+							{notempty name="$config.icp"}{$config.icp}{/notempty}
+						</td>
+						<td class="layui-td-gray">公安备案号</td>
+						<td>
+							{notempty name="$config.beian"}{$config.beian}{/notempty}
+						</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray">版权信息</td>
+						<td>
+							{notempty name="$config.copyright"}{$config.copyright}{/notempty}
+						</td>
+						<td class="layui-td-gray">代码版本号
+						</td>
+						<td>
+							{notempty name="$config.version"}{$config.version}{/notempty}
+						</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray">系统简介</td>
+						<td colspan="3">
+							{notempty name="$config.desc"}{$config.desc} {/notempty}
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<div class="layui-card">
+			<div class="table-title">服务器信息</div>
+			<div class="layui-card-body">
+				<table class="layui-table" lay-skin="" lay-size="sm">
+					{if condition="($install == true)"}
+					<tr>
+						<td colspan="4" style="color: #E94335; background-color:#f5f5f5">
+							提醒：发现app目录下的install文件夹没删除，为了系统的安全,请手动去删除。</td>
+					</tr>
+					{/if}
+					<tr>
+						<td class="layui-td-gray-2">服务器系统</td>
+						<td>{:get_system_info('os')}</td>
+						<td class="layui-td-gray-2">PHP版本</td>
+						<td>{:get_system_info('php')}</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray-2">上传限制</td>
+						<td>{:get_system_info('upload_max_filesize')}</td>
+						<td class="layui-td-gray-2">执行限制</td>
+						<td>{:get_system_info('max_execution_time')}</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray-2">ThinkPHP</td>
+						<td>{$TP_VERSION}</td>
+						<td class="layui-td-gray-2">Layui</td>
+						<td>{:LAYUI_VERSION}</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray-2">勾股DEV</td>
+						<td colspan="3">{:CMS_VERSION}<a class="layui-badge layui-bg-blue" style="margin-left:10px"
+								href="https://blog.gougucms.com/home/book/detail/bid/7.html" target="_blank">勾股DEV文档</a>
+						</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray-2">合作联系微信号</td>
+						<td colspan="3">hdm588，业务合作、功能定制请备注</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray-2">QQ交流群</td>
+						<td colspan="3">搜Q群：24641076，或点击 <a href="https://jq.qq.com/?_wv=1027&k=pxshRv6I"
+								target="_blank" rel="nofollow"><img border="0"
+									src="//pub.idqqimg.com/wpa/images/group.png" alt="gougucms交流群" title="gougucms交流群"
+									style="vertical-align:middle"></a></td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray-2">同系开源软件</td>
+						<td colspan="3"><a class="layui-badge layui-bg-blue" style="margin-right:16px"
+								href="https://gitee.com/gougucms/gougucms" target="_blank">勾股CMS</a><a
+								class="layui-badge layui-bg-blue" style="margin-right:16px"
+								href="https://gitee.com/gougucms/blog" target="_blank">勾股BLOG</a><a
+								class="layui-badge layui-bg-blue" style="margin-right:16px"
+								href="https://gitee.com/gougucms/office" target="_blank">勾股OA</a><a
+								class="layui-badge layui-bg-blue"
+								href="https://gitee.com/gouguopen/guoguadmin" target="_blank">勾股ADMIN</a></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}

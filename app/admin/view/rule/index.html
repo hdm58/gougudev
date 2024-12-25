@@ -1,0 +1,105 @@
+{extend name="../../base/view/common/base"/}
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+  <a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+  <a href="/home/user/setting">信息设置</a>
+  <a><cite>菜单节点</cite></a>
+</span>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="main-content">
+	{include file="../../base/view/common/submenu" /}
+	<div class="main-page-content">
+		<div class="layui-form-bar">
+			<button class="layui-btn layui-btn-sm add-menu">+ 添加菜单/节点</button>
+		</div>
+		<div>
+			<table class="layui-hide" id="treeTable" lay-filter="treeTable"></table>
+		</div>
+	</div>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	var ptable = null, treeGrid = null,rightpage=null, layer = null, tableId = "treeTable";
+	const moduleInit = ['tool','treeGrid'];
+	function gouguInit() {
+		treeGrid = layui.treeGrid;
+		tool = layui.tool;
+		layer = layui.layer;
+		ptable = treeGrid.render({
+			id: tableId
+			, elem: '#' + tableId
+			, idField: 'id'
+			, url: "/admin/rule/index"
+			, method :"get"
+			, cellMinWidth: 180
+			, treeId: 'id'//树形id字段名称
+			, treeUpId: 'pid'//树形父id字段名称
+			, treeShowName: 'title'//以树形式显示的字段
+			,heightRemove:[".dHead",24]//不计算的高度,表格设定的是固定高度，此项不生效
+			,height:'100%'
+			, cols: [[
+				{ field: 'id', width: 80, title: 'ID号', align: 'center'}
+				, { field: 'sort', width: 60, title: '排序',align: 'center'}
+				,{field:'icon',title: '菜单图标',width: 80, align: 'center' ,templet: function(d){
+					var html='<strong class="iconfont '+d.icon+'"></strong>';
+					return html;
+				}}
+				, { field: 'title', width: 150, title: '菜单/节点名称'}
+				, { field: 'pid', title: '父ID', width: 80, align: 'center' }
+				, { field: 'src', title: 'URL链接'}
+				, { field: 'menu', width: 90, title: '是否菜单',align: 'center', templet: function (d) {
+						var html = '<span style="color:#fbbc05">否</span>';
+						if(d.menu=='1'){
+							html = '<span style="color:#12bb37">是</span>';
+						}
+						return html;
+					}
+				}
+				, {field: 'name', width: 90, title: '日志名称',align: 'center'}
+				, {width: 200, title: '操作', align: 'center'
+					, templet: function (d) {
+						var html = '<span class="layui-btn-group"><button class="layui-btn layui-btn-xs" lay-event="add">添加子菜单/节点</button><button class="layui-btn layui-btn-normal  layui-btn-xs" lay-event="edit">编辑</button><button class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</button></span>';
+						return html;
+					}
+				}
+			]]
+			, page: false
+		});
+		//表头工具栏事件
+		$('.add-menu').on('click',function(){
+			tool.open('/admin/rule/add');
+			return;
+		});
+
+		//操作按钮
+		treeGrid.on('tool(' + tableId + ')', function (obj) {
+			if (obj.event === 'add') {
+				tool.open('/admin/rule/add?pid='+obj.data.id);
+			}
+			if (obj.event === 'edit') {
+				tool.open('/admin/rule/add?id='+obj.data.id);
+			}
+			if (obj.event === 'del') {
+				layer.confirm('确定要删除吗?', { icon: 3, title: '提示' }, function (index) {
+					let callback = function (e) {
+							layer.msg(e.msg);
+							if (e.code == 0) {
+								obj.del();
+							}
+						}
+					tool.delete("/admin/rule/delete",{ id: obj.data.id },callback);
+					layer.close(index);
+				});
+			}
+			return;
+		});
+	}
+</script>
+{/block}
+<!-- /脚本 -->

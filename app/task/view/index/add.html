@@ -1,0 +1,142 @@
+<form class="layui-form page-content p-4">
+	<h3 class="h3-title">新建任务</h3>
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">任务主题<font>*</font>
+			</td>
+			<td colspan="3">
+				<input type="text" name="title" lay-verify="required" lay-reqText="请输入任务主题" placeholder="请输入任务主题" class="layui-input" value="">
+			</td>
+			<td class="layui-td-gray">任务性质<span style="color: red">*</span></td>
+			<td>
+				<select name="is_bug" lay-verify="required" lay-reqText="请选择任务性质">
+					<option value="">请选择</option>
+					<option value="0">普通任务(TASK)</option>
+					<option value="1">问题缺陷(BUG)</option>
+				</select>
+			</td>
+			<td class="layui-td-gray">优先级<span style="color: red">*</span></td>
+			<td>
+				<select name="priority" lay-verify="required" lay-reqText="请选择优先级">
+					<option value="1" selected>低</option>
+					<option value="2">中</option>
+					<option value="3">高</option>
+					<option value="4">紧急</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">任务类型<span style="color: red">*</span></td>
+			<td>
+				<select name="type" lay-verify="required" lay-reqText="请选择任务类型">
+					<option value="">请选择</option>
+					{volist name="type" id="vo"}
+						<option value="{$vo.id}">{$vo.title}</option>
+					{/volist}
+				</select>
+			</td>
+			<td class="layui-td-gray">工作类型<span style="color: red">*</span></td>
+			<td>
+				<select name="cate" lay-verify="required" lay-reqText="请选择工作类型">
+					<option value="">请选择</option>
+					{volist name="cate" id="vo"}
+					<option value="{$vo.id}">{$vo.title}</option>
+					{/volist}
+				</select>
+			</td>
+			<td class="layui-td-gray-2">预计结束日期<span style="color: red">*</span></td>
+			<td>
+				<input type="text" id="end_time" name="end_time" readonly lay-verify="required" lay-reqText="请选择结束时间"
+					placeholder="请选择时间" class="layui-input" value="">
+			</td>
+			<td class="layui-td-gray">预估工时<span style="color: red">*</span></td>
+			<td>
+				<input type="text" name="plan_hours" lay-verify="required" lay-reqText="请填写预估工时" placeholder="请填写预估工时"
+					class="layui-input" value="">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">指派给</td>
+			<td>
+				<input type="text" name="director_name" placeholder="请选择" readonly class="layui-input picker-one" value="">
+				<input type="hidden" name="director_uid" readonly value="">
+			</td>
+			{empty name="$project_id"}
+			<td class="layui-td-gray">协作人</td>
+			<td colspan="3">
+				<input type="text" name="assist_admin_names" placeholder="请选择" readonly class="layui-input picker-more" value="">
+				<input type="hidden" name="assist_admin_ids" readonly value="">
+			</td>
+			<td class="layui-td-gray">关联项目</td>
+			<td>
+				<select id="projectId" name="project_id" lay-filter="project_id">
+					<option value="">请选择关联项目</option>
+					{volist name="$project" id="v"}
+					<option value="{$v.id}">{$v.name}</option>
+					{/volist}
+				</select>
+			</td>
+			{else/}
+			<td class="layui-td-gray">协作人</td>
+			<td colspan="5">
+				<input type="hidden" name="project_id" readonly value="{$project_id}">
+				<input type="text" name="assist_admin_names" placeholder="请选择" readonly class="layui-input picker-more" value="">
+				<input type="hidden" name="assist_admin_ids" readonly value="">
+			</td>
+			{/empty}
+		</tr>
+	</table>
+	<div>
+		<div style="padding:10px 0">详细描述<span style="color: red">*</span></div>
+		<div>
+			<textarea id="mdContent" style="display:none;"></textarea>
+			<div id="docContent"></div>
+		</div>
+	</div>
+	<div style="padding: 10px 0">
+		<input type="hidden" name="id" value="0" />
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	</div>
+</form>
+
+<script>
+	function openInit() {
+		const form = layui.form, layer = layui.layer,editor = layui.editormd, tool = layui.tool, laydate = layui.laydate, dropdown = layui.dropdown, employeepicker = layui.employeepicker;
+
+		form.render();
+		var edit = editor.render('docContent', {
+			markdown: $('#mdContent').val(),
+			imageUploadURL: "/api/index/md_upload",
+			lineNumbers: false,
+			toolbarIcons: function () {
+				return [
+					"undo", "redo","bold", "del", "italic", "quote","h1", "h2", "h3", "h4", "h5",
+					"list-ul", "list-ol", "hr","link", "reference-link", "image", "code", "code-block", "table","watch", "fullscreen"
+				];
+			},
+			height: window.innerHeight - 336,
+		});
+
+		//日期范围
+		laydate.render({
+			elem: '#end_time'
+		});
+
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.close(1000);
+					if(layui.taskTable){
+						layui.taskTable.reload();
+					}					
+				}
+			}
+			tool.post("/task/index/add", data.field, callback);
+			return false;
+		});
+	}
+
+</script>

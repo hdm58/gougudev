@@ -1,0 +1,77 @@
+<form class="layui-form page-content p-4">
+	<h3 class="h3-title">新建产品</h3>
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray-2">产品名称<font>*</font>
+			</td>
+			<td>
+				<input type="text" name="name" lay-verify="required" lay-reqText="请输入产品名称" placeholder="请输入产品名称"
+					class="layui-input" value="">
+			</td>
+			<td class="layui-td-gray-2">产品负责人<font>*</font>
+			</td>
+			<td>
+				<input type="text" name="director_name" placeholder="请选择产品负责人" readonly class="layui-input picker-one" value="">
+				<input type="hidden" name="director_uid" lay-verify="required" readonly lay-reqText="请选择产品负责人" value="">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray-2">参与评审人</td>
+			<td colspan="4">
+				<input type="text" id="check_admin_names" name="check_admin_names" readonly class="layui-input picker-more" placeholder="请选择评审人" value="">
+				<input type="hidden" id="check_admin_ids" name="check_admin_ids" readonly lay-verify="required" lay-reqText="请选择评审人" value="">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray-2">访问控制</td>
+			<td colspan="4">
+				<input type="radio" name="is_open" lay-filter="checkopen" value="1" checked title="内部(仅创建人、负责人、评审人可访问)">
+				<input type="radio" name="is_open" lay-filter="checkopen" value="2" title="公开(有产品视图权限员工均可访问)">
+			</td>
+		</tr>
+	</table>
+	<div>
+		<div class="py-2">产品描述<span style="color: red">*</span></div>
+		<div>
+			<textarea id="mdContent" style="display:none;"></textarea>
+			<div id="docContent"></div>
+		</div>
+	</div>
+	<div class="pt-3">
+		<input type="hidden" name="id" value="0" />
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	</div>
+</form>
+
+<script>
+	function openInit() {
+		var form = layui.form, layer = layui.layer, tool = layui.tool, employeepicker = layui.employeepicker,editor = layui.editormd;
+
+		form.render();
+		var edit = editor.render('docContent', {
+			markdown: $('#mdContent').val(),
+			imageUploadURL: "/api/index/md_upload",
+			lineNumbers: false,
+			toolbarIcons: function () {
+				return [
+					"undo", "redo","bold", "del", "italic", "quote","h1", "h2", "h3", "h4", "h5",
+					"list-ul", "list-ol", "hr","link", "reference-link", "image", "code", "code-block", "table","watch", "fullscreen"
+				];
+			},
+			height: window.innerHeight - 320,
+		});
+
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.close(1000);
+				}
+			}
+			tool.post("/product/index/add", data.field, callback);
+			return false;
+		});
+	}
+</script>

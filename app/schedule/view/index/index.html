@@ -1,0 +1,139 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="style"}
+<style>
+	.layui-unselect dl {
+		max-height: 188px;
+	}
+</style>
+{/block}
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+	<a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+	<a><cite>工作记录</cite></a>
+</span>
+{/block}
+{block name="body"}
+<div id="scheduleList" class="table-content p-3">
+	<div class="layui-form-bar border-t border-x">
+		<form class="layui-form">
+			<div class="layui-input-inline" style="width:100px;">
+				<select name="cate">
+					<option value="">工作类型</option>
+					{volist name="cate" id="vo"}
+					<option value="{$vo.id}">{$vo.title}</option>
+					{/volist}
+				</select>
+			</div>
+			<div class="layui-input-inline" style="width:240px;">
+				<input type="text" name="project" placeholder="请选择项目" readonly class="layui-input picker-oa" data-types="project" />
+				<input name="project_id" style="display: none;" value="" />
+			</div>
+			<div class="layui-input-inline" style="width:120px;">
+				<input type="text" name="user" placeholder="执行员工" readonly class="layui-input picker-admin" autocomplete="off" />
+				<input name="uid" style="display: none;" value="" />
+			</div>
+			<div class="layui-input-inline" style="width:240px;">
+				<input type="text" name="keywords" placeholder="工作内容" class="layui-input" autocomplete="off" />
+			</div>
+			<div class="layui-input-inline" style="width:300px;">
+				<input type="text" class="layui-input" id="diff_time" placeholder="工作时间范围" readonly name="diff_time">
+			</div>
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="searchform">搜索</button>
+			<button type="reset" class="gougu-clear" lay-filter="clear">清空</button>
+		</form>
+	</div>
+	<table class="layui-hide" id="scheduleTable" lay-filter="schedule"></table>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	const moduleInit = ['tool','tablePlus','gouguEdit','gouguComment','gouguSchedule','employeepicker','oaPicker','laydatePlus'];
+	function gouguInit() {
+		var table = layui.tablePlus, form = layui.form, tool = layui.tool, employeepicker = layui.employeepicker, oaPicker = layui.oaPicker, schedule = layui.gouguSchedule, laydatePlus = layui.laydatePlus;
+
+		var diff_time = new laydatePlus({'target':'diff_time'});
+		layui.pageTable = table.render({
+			elem: '#scheduleTable',
+			title: '工作记录列表',
+			toolbar: true,
+			cellMinWidth: 80,
+			url: "/schedule/index/index", //数据接口
+			page: true, //开启分页
+			limit: 20,
+			where: { 'uid': 0 },
+			page: true, //开启分页
+			limit: 20,
+			is_excel:true,
+			height: 'full-140',
+			cols: [[ //表头
+				{ field: 'id', title: '序号', width: 80, align: 'center',fixed:'left'}
+				, {
+					field: 'start_time', title: '工作时间范围', align: 'center', width: 186, templet: function (d) {
+						var html = d.start_time + '至' + d.end_time;
+						return html;
+					}
+				}
+				, { field: 'labor_time', title: '工时', style: 'color: #91CC75;', align: 'center', width: 60 }
+				, { field: 'work_cate', title: '工作类型', align: 'center', width: 100 }
+				, { field: 'title', title: '工作内容',minWidth: 240}
+				, { field: 'task_name', title: '关联任务',width: 240}
+				, { field: 'project_name', title: '关联项目',width: 200}
+				, { field: 'name', title: '执行员工', align: 'center', width: 80 }
+				, { field: 'department', title: '所在部门', align: 'center', width: 100 }
+				, { field: 'create_time', title: '记录时间', align: 'center', width: 150 }
+				, {
+					title: '操作',fixed:'right', align: 'center', width: 120, templet: function (d) {
+						return '<div class="layui-btn-group"><span class="layui-btn layui-btn-xs" lay-event="edit">修改</span><span class="layui-btn layui-btn-normal layui-btn-xs" lay-event="view">详细</span><span class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</span></div>';
+					}
+				}
+			]]
+		});
+
+		table.on('tool(schedule)', function (obj) {
+			if (obj.event === 'edit') {
+				schedule.add(0,obj.data);
+			}
+			if (obj.event === 'view') {
+				schedule.view(obj.data);
+			}
+			if (obj.event === 'del') {
+				layer.confirm('确定要删除该工作记录吗？', { icon: 3, title: '提示' }, function (index) {
+					let callback = function (e) {
+						layer.closeAll();
+						layer.msg(e.msg);
+						if(e.code==0){
+							layui.pageTable.reload();
+						}
+					}
+					let postData = { "id": obj.data.id };
+					tool.delete("/schedule/index/delete", postData, callback);
+				});
+			}
+			return false;
+		})
+		//新增
+		$('#scheduleList').on('click', '.add-new', function () {
+			tool.open('/task/index/add');
+		});		
+		//监听搜索提交
+		form.on('submit(searchform)', function(data) {
+			layui.pageTable.reload({
+				where: data.field,
+				page: {curr: 1}
+			});
+			return false;
+		});
+		
+		$('#scheduleList').on('click', '[lay-filter="clear"]', function () {
+			setTimeout(function () {
+				$('[lay-filter="searchform"]').click();
+			}, 10)
+		})
+	}		
+</script>
+{/block}
+<!-- /脚本 -->

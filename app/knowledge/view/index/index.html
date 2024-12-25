@@ -1,0 +1,188 @@
+{extend name="../../base/view/common/base" /}
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+  <a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+  <a><cite>知识库</cite></a>
+</span>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="table-content p-3">
+	<div class="layui-tab knowledge-tab" style="margin:0" lay-filter="docDemoTabBrief">
+		<ul class="layui-tab-title">
+			<li>个人知识库</li>
+			<li class="layui-this">共享知识库</li>
+		</ul>
+	</div>
+	<form class="layui-form layui-form-bar border-x border-b mb-3">
+		<div class="layui-input-inline" style="width:120px">
+			<select name="cate_id">
+				<option value="">请选择分类</option>
+				{volist name=":set_recursion(knowledge_cate())" id="v"}
+				<option value="{$v.id}">{$v.title}</option>
+				{/volist}
+			</select>
+		</div>
+		<div class="layui-input-inline" style="width:240px;">
+			<input type="text" name="keywords" placeholder="标题/分类/描述" class="layui-input" autocomplete="off" />
+		</div>
+		<div class="layui-input-inline" style="width:160px;">
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="searchform"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+			<button type="reset" class="layui-btn layui-btn-reset" lay-filter="reset">清空</button>
+		</div>
+		<span style="float:right" class="layui-btn add-new">+ 新建知识库</span>
+	</form>
+	<div class="knowledge-list layui-row layui-col-space12" id="knowledgeContent">
+
+	</div>
+	<div id="pageBox" class="page-box py-4"></div>
+</div>
+
+<script type="text/html" id="barDemo">
+<div class="layui-btn-group"><span class="layui-btn layui-btn-normal layui-btn-xs" lay-event="view">查看</span></div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	const eid = {$eid};
+	const kid = {$kid};
+	var getKnowledge = null;
+	var getData = {'page':1,'share':1,'limit':9};
+	const moduleInit = ['tool','treeGrid'];
+	function gouguInit() {
+		var tool = layui.tool,
+			layer = layui.layer,
+			form = layui.form,
+			element = layui.element,
+			laypage = layui.laypage;
+			
+		element.on('tab(docDemoTabBrief)', function(data){
+			getData.share=data.index;
+			getKnowledge();
+		});
+
+		if(eid>0 && kid == 0){
+			tool.open('/knowledge/index/add/id/'+kid+'.html');
+		}
+		if(eid == 0 && kid > 0){
+			tool.open('/knowledge/index/view/id/'+kid+'.html');
+		}		
+		getKnowledge = function(){
+			tool.get("/knowledge/index/index",getData,function(res){
+				if(res.code == 0){
+					let card='';
+					for(let i=0; i<res.data.length;i++){
+						let item = res.data[i];
+						if(getData.share == 1){
+							card+=`
+								<div class="layui-col-md4">
+									<div class="layui-card">
+										<div class="card-body">
+											<div class="meta-title text-overflow1"><a href="/knowledge/index/doc_detail/kid/${item.id}">${item.title}</a></div>
+											<div class="meta-desc text-overflow3"><a href="/knowledge/index/doc_detail/kid/${item.id}">${item.desc}</a></div>
+										</div>
+										<div class="card-actions">
+											<ul>
+												<li title="章节数">共${item.sections}章节</li>
+												<li title="查阅数">浏览：${item.views}</li>
+												<li title="编辑"><a class="action-edit" data-id="${item.id}" data-admin="${item.admin_id}" href="javascript:;">编辑</a></li>
+												<li title="浏览详情"><a class="action-view" href="/knowledge/index/doc_detail/kid/${item.id}">详情</a></li>
+											</ul>
+										</div>
+									</div>
+								</div>
+								`;
+						}
+						else{
+							card+=`
+								<div class="layui-col-md4">
+									<div class="layui-card">
+										<div class="card-body">
+											<div class="meta-title text-overflow1"><a href="/knowledge/index/doc_detail/kid/${item.id}">${item.title}</a></div>
+											<div class="meta-desc text-overflow3"><a href="/knowledge/index/doc_detail/kid/${item.id}">${item.desc}</a></div>
+										</div>
+										<div class="card-actions">
+											<ul>
+												<li title="章节数">共${item.sections}章节</li>
+												<li title="删除"><a class="action-del" data-id="${item.id}" data-admin="${item.admin_id}" href="javascript:;">删除</a></li>
+												<li title="编辑"><a class="action-edit" data-id="${item.id}" data-admin="${item.admin_id}" href="javascript:;">编辑</a></li>
+												<li title="浏览详情"><a class="action-view" href="/knowledge/index/doc_detail/kid/${item.id}">详情</a></li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							`;
+						}
+					}
+					if(card == ''){
+						card='<div style="text-align:center; color:#999; padding:24px 0">暂无数据</div>';
+					}
+					$('#knowledgeContent').html(card);
+					if(getData.page==1 && res.count>9){
+						laypage.render({
+							elem: 'pageBox'
+							,limit:9
+							,count: res.count //数据总数，从服务端得到
+							,jump: function(obj, first){
+								console.log(obj.curr); //得到当前页		
+								getData.page=obj.curr;
+								//首次不执行
+								if(!first){
+								  	getKnowledge();
+								}
+							}
+						});
+					}
+				}		
+			});
+		}
+		getKnowledge();
+
+		$('.add-new').on('click',function(){
+			tool.open('/knowledge/index/add');
+		});
+		
+		$('#knowledgeContent').on('click','.action-del',function(){
+			let admin_id = $(this).data('admin');
+			if(admin_id != GOUGU_DEV.uid){
+				layer.msg('您不是该知识库创建者，无权限删除');
+				return false;
+			}
+			let id=$(this).data('id');
+			layer.confirm('确定要删除该知识吗?', { icon: 3, title: '提示' }, function (index) {
+				let callback = function (e) {
+					layer.closeAll();
+					layer.msg(e.msg);
+					getKnowledge();
+				}
+				let postData = { "id": id };
+				tool.delete("/knowledge/index/delete", postData, callback);
+			});
+		});
+		
+		
+		$('#knowledgeContent').on('click','.action-edit',function(){
+			let admin_id = $(this).data('admin');
+			if(admin_id != GOUGU_DEV.uid){
+				layer.msg('您不是该知识库创建者，无权限编辑');
+				return false;
+			}
+			let id=$(this).data('id');
+			tool.open('/knowledge/index/view/id/'+id+'.html');
+		});
+		
+		//监听搜索提交
+		form.on('submit(searchform)', function(data) {
+			getData.page=1;
+			getData.keywords=data.field.keywords;
+			getData.cate_id=data.field.cate_id;
+			getKnowledge();
+			return false;
+		});
+	}
+</script>
+{/block}
+<!-- /脚本 -->

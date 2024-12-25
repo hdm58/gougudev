@@ -1,0 +1,236 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="style"}
+<style>
+	.layui-unselect dl {
+		max-height: 188px;
+	}
+</style>
+{/block}
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+	<a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+	<a><cite>任务中心</cite></a>
+</span>
+{/block}
+{block name="body"}
+<div id="taskList" class="table-content p-3">
+	<div class="gougu-tab-bar border-t border-x">
+		<div class="layui-row">
+			<div class="layui-col-md6 gougu-tab">
+				<ul class="gougu-tab-title big" id="taskTab">
+					<li class="tab-this" data-type="0">全部</li>
+					{volist name="$task_cate" id="vo"}
+					<li data-type="{$vo.id}">{$vo.title}</li>
+					{/volist}
+				</ul>
+			</div>
+			<div class="layui-col-md6 py-2 px-3" style="text-align:right">
+				<div class="layui-btn-group mr-4" style="display:none;">
+					<button type="button" data-event="show" class="layui-btn layui-btn-sm layui-btn-normal"><i
+							class="layui-icon">&#xe62d;</i>列表</button>
+					<button type="button" data-event="show" class="layui-btn layui-btn-sm layui-btn-primary"><i
+							class="layui-icon">&#xe630;</i>看板</button>
+					<button type="button" data-event="show" class="layui-btn layui-btn-sm layui-btn-primary"><i
+							class="layui-icon">&#xe637;</i>日历</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="layui-form-bar border-t border-x">
+		<form id="taskForm" class="layui-form">
+			<div class="layui-input-inline" style="width:100px;">
+				<select name="flow_status" lay-filter="status">
+					<option value="">任务状态</option>
+					<option value="1">未开始</option>
+					<option value="2">进行中</option>
+					<option value="3">已完成</option>
+					<option value="4">已拒绝</option>
+					<option value="5">已关闭</option>
+				</select>
+			</div>
+			<div class="layui-input-inline" style="width:100px;">
+				<select name="priority" lay-filter="priority">
+					<option value="">优先级</option>
+					<option value="1">低</option>
+					<option value="2">中</option>
+					<option value="3">高</option>
+					<option value="4">紧急</option>
+				</select>
+			</div>
+			<div class="layui-input-inline" style="width:100px;">
+				<select name="cate" lay-filter="cate">
+					<option value="">工作类型</option>
+					{volist name="cate" id="vo"}
+					<option value="{$vo.id}">{$vo.title}</option>
+					{/volist}
+				</select>
+			</div>
+			<div class="layui-input-inline" style="width:240px;">
+				<input type="text" name="project" placeholder="请选择项目" readonly class="layui-input picker-oa" data-types="project" />
+				<input name="project_id" style="display: none;" value="" />
+			</div>
+			<div class="layui-input-inline" style="width:120px;">
+				<input type="text" name="director" placeholder="负责人" readonly class="layui-input picker-admin" autocomplete="off" />
+				<input name="director_uid" style="display: none;" value="" />
+			</div>
+			<div class="layui-input-inline" style="width:120px;">
+				<input type="text" name="assist_admin" placeholder="协作人" readonly class="layui-input picker-admin" autocomplete="off" />
+				<input name="assist_admin_ids" style="display: none;" value="" />
+			</div>
+			<div class="layui-input-inline" style="width:100px;">
+				<select name="is_delay">
+					<option value="">逾期查询</option>
+					<option value="1">未逾期</option>
+					<option value="2">已逾期</option>
+				</select>
+			</div>
+			<div class="layui-input-inline" style="width:240px;">
+				<input type="text" name="keywords" placeholder="主题/描述内容" class="layui-input" autocomplete="off" />
+			</div>
+			<input type="hidden" name="type" />
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="searchform">搜索</button>
+			<button type="reset" class="gougu-clear" lay-filter="clear">清空</button>
+		</form>
+	</div>
+	<table class="layui-hide" id="test" lay-filter="test"></table>
+</div>
+<script type="text/html" id="toolbarDemo">
+  <div class="layui-btn-container">
+  	<button class="layui-btn layui-btn-sm" lay-event="add">+ 新建任务</button>
+  </div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	const moduleInit = ['tool','tablePlus','gouguEdit','gouguComment','gouguSchedule','employeepicker','oaPicker','editormd'];
+	function gouguInit() {
+		var table = layui.tablePlus, form = layui.form, tool = layui.tool, employeepicker = layui.employeepicker, oaPicker = layui.oaPicker;
+
+		layui.taskTable = table.render({
+			elem: '#test',
+			title: '任务列表',
+			cellMinWidth: 80,
+			toolbar: '#toolbarDemo',
+			url: "/task/index/index", //数据接口
+			page: true, //开启分页
+			limit: 20,
+			is_excel:true,
+			height: 'full-186',
+			cols: [[
+				{
+					field: 'id', title: '任务编号', width: 80, align: 'center', fixed: 'left', templet: function (d) {
+						return 'T' + d.id;
+					}
+				}
+				, {
+					field: 'flow_name', title: '状态', align: 'center', width: 80, templet: function (d) {
+						var html = '<span class="layui-badge bg-flow-' + d.flow_status + '">' + d.flow_name + '</span>';
+						return html;
+					}
+				}
+				, {
+					field: 'flow_name', title: '完成进度', align: 'center', width: 80, templet: function (d) {
+						if(d.done_ratio == 0){
+							return d.done_ratio;
+						}
+						else{
+							return d.done_ratio + '%';
+						}
+					}
+				}
+				, {
+					field: 'type_name', title: '类型', width: 80, align: 'center', templet: function (d) {
+						var html = '<span class="color-status-' + d.type + '">' + d.type_name + '</span>';
+						return html;
+					}
+				}
+				, {
+					field: 'title', title: '任务主题',minWidth: 240, rowspan: 2, templet: function (d) {
+						var html = '<span class="layui-badge bg-priority-' + d.priority + '">' + d.priority_name + '</span> <a class="open-a" data-href="/task/index/view/id/' + d.id + '">' + d.title + '</a>';
+						return html;
+					}
+				}
+				, { field: 'project_name', title: '关联项目', width: 200 }
+				, { field: 'director_name', title: '负责人', align: 'center', width: 80 }
+				, { field: 'assist_admin_names', title: '协作人', width: 200 }
+				, { field: 'cate_name', title: '工作类型', width: 90, align: 'center' }
+				, { field: 'plan_hours', title: '预估工时', align: 'center', width: 80 }
+				, {
+					field: 'end_time', title: '预计结束日期', width: 150, templet: function (d) {
+						var html = d.end_time;
+						if (d.delay > 0) {
+							html += '<span class="color-status-0 ml-1" style="font-size:12px;">逾期' + d.delay + '天</span>';
+						}
+						return html;
+					}
+				}
+			]]
+		});
+
+		//触发事件
+		table.on('toolbar(test)', function(obj){
+			if(obj.event === 'add'){
+				tool.open('/task/index/add');
+				return;
+			}
+		});
+
+		//查看模式
+		$('#taskList').on('click', '[data-event="show"]', function () {
+			layer.msg('开源版只支持列表模式');
+		});
+
+		//任务类型
+		$('#taskTab').on('click', 'li', function () {
+			$(this).addClass('tab-this').siblings().removeClass('tab-this');
+			let type = $(this).data('type');
+			$('#taskForm').find('[name="type"]').val(type);
+			tableReload();
+		});
+
+		form.on('select(status)', function (data) {
+			tableReload();
+		});
+		form.on('select(priority)', function (data) {
+			tableReload();
+		});
+		form.on('select(cate)', function (data) {
+			tableReload();
+		});
+		form.on('select(project)', function (data) {
+			tableReload();
+		});
+		//监听搜索提交
+		form.on('submit(searchform)', function (data) {
+			tableReload();
+			return false;
+		});
+		$('#taskForm').on('click', '[lay-filter="clear"]', function () {
+			setTimeout(function () {
+				tableReload();
+			}, 10)
+		})
+
+		function tableReload() {
+			let postData = {
+				type: $('#taskForm').find('[name="type"]').val(),
+				flow_status: $('#taskForm').find('[name="flow_status"]').val(),
+				priority: $('#taskForm').find('[name="priority"]').val(),
+				cate: $('#taskForm').find('[name="cate"]').val(),
+				delay: $('#taskForm').find('[name="delay"]').val(),
+				director_uid: $('#taskForm').find('[name="director_uid"]').val(),
+				assist_admin_ids: $('#taskForm').find('[name="assist_admin_ids"]').val(),
+				project_id: $('#taskForm').find('[name="project_id"]').val(),
+				is_delay: $('#taskForm').find('[name="is_delay"]').val(),
+				keywords: $('#taskForm').find('[name="keywords"]').val()
+			}
+			layui.taskTable.reload({ where: postData });
+		}
+	}		
+</script>
+{/block}
+<!-- /脚本 -->

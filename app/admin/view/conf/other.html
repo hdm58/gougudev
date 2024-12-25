@@ -1,0 +1,41 @@
+<form class="layui-form page-content p-4">
+	<h3 class="h3-title">其他配置</h3>
+	<table class="layui-table">
+		<tr>
+			<td class="layui-td-gray">开发者</td>
+			<td>
+				<input type="text" name="author" autocomplete="off" placeholder="请输入开发者" lay-reqText="请输入开发者" class="layui-input"{notempty name="$config.author"} value="{$config.author}" {/notempty}>
+			</td>
+			<td class="layui-td-gray-2">开发版本号
+			</td>
+			<td>
+				<input type="text" name="version" autocomplete="off" placeholder="请输入版本号" lay-reqText="请输入版本号" class="layui-input" {notempty name="$config.version"} value="{$config.version}" {/notempty}>
+			</td>
+		</tr>
+	</table>
+
+	<div style="padding: 10px 0">
+		<input type="hidden" value="{$id}" name="id">
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	</div>
+</form>
+<script>
+	function openInit() {
+		var form = layui.form,
+			layer = layui.layer,
+			tool = layui.tool;
+		form.render();
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.close(1000);
+				}
+			}
+			tool.post("/admin/conf/edit",data.field,callback);
+			return false;
+		});
+	}
+</script>

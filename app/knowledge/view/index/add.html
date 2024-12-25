@@ -1,0 +1,85 @@
+<form class="layui-form page-content p-4">
+	{eq name="$id" value="0"}
+	<h3 class="h3-title">新建知识</h3>
+	{else/}
+	<h3 class="h3-title">编辑知识</h3>
+	{/eq}
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">知识标题<font>*</font></td>
+			<td colspan="5">
+				<input type="text" name="title" lay-verify="required" lay-reqText="请输入知识标题" placeholder="请输入知识标题" class="layui-input"
+			  {notempty name="$knowledge.title" }value="{$knowledge.title}" {/notempty}>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">所属分类<span style="color: red">*</span></td>
+			<td>
+				<select name="cate_id" lay-verify="required" lay-reqText="请选择分类">
+					<option value="">请选择分类</option>
+					{notempty name="$knowledge.cate_id"}
+						{volist name=":set_recursion(knowledge_cate())" id="v"}
+						<option value="{$v.id}" {eq name="$knowledge.cate_id" value="$v.id" }selected{/eq}>{$v.title}</option>
+						{/volist}
+					{else/}
+						{volist name=":set_recursion(knowledge_cate())" id="v"}
+						<option value="{$v.id}">{$v.title}</option>
+						{/volist}
+					{/notempty}
+				</select>
+			</td>
+			<td class="layui-td-gray">排序</td>
+			<td>
+				<input type="text" name="sort" placeholder="请输入排序，数字" class="layui-input" {notempty
+			  name="$knowledge.sort" }value="{$knowledge.sort}" {/notempty}>
+			</td>
+			<td class="layui-td-gray">是否公开<span style="color: red">*</span></td>
+			<td>
+				{if condition="$id eq 0"}
+				<input type="radio" name="is_share" value="1" title="公开" checked>
+				<input type="radio" name="is_share" value="0" title="私有">
+				{else/}
+				<input type="radio" name="is_share" value="1" title="公开" {eq name="$knowledge.is_share" value="1" }checked{/eq}>
+				<input type="radio" name="is_share" value="0" title="私有" {eq name="$knowledge.is_share" value="0" }checked{/eq}>
+				{/if}
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray" style="vertical-align:top;">知识描述<span style="color: red">*</span></td>
+			<td colspan="5">
+				<textarea class="layui-textarea" name="desc" style="height:300px;">{notempty name="$knowledge.desc" }{$knowledge.desc}{/notempty}</textarea>
+			</td>
+		</tr>
+	</table>
+
+	<div style="padding: 10px 0">
+		<input type="hidden" name="id" value="{$id}" />
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	</div>
+</form>
+
+<script>
+function openInit() {
+	var form = layui.form,
+		layer = layui.layer,
+		tool = layui.tool;
+			
+	form.render();
+
+    //监听提交
+    form.on('submit(webform)', function (data) {
+		let callback = function (e) {
+			layer.msg(e.msg);
+			if (e.code == 0) {
+				getData.page=1;
+				getKnowledge();
+				tool.load('/knowledge/index/view/id/'+e.data+'.html');
+			}
+		}
+		tool.post("/knowledge/index/add",data.field,callback);
+		return false;
+    });
+}
+
+</script>

@@ -1,0 +1,30 @@
+	<div class="sub-menu" style="width: 200px;">
+		<div class="sub-menu-content" style="width: 200px;">
+			<ul>
+			<li class="sub-menu-title"><a href="javascript:;"><i class="iconfont icon-zaijixueshengguanli"></i><span class="text">用户信息</span></a></li>
+			<li  class="sub-menu-li {eq name='$params.action' value='edit_personal'} active{/eq}"><a href="/home/user/edit_personal"><span class="text">编辑个人信息</span></a></li>
+			<li  class="sub-menu-li {eq name='$params.action' value='edit_password'} active{/eq}"><a href="/home/user/edit_password"><span class="text">修改登录密码</span></a></li>
+			{foreach name=":get_menus(1)" item="a"}
+				{notempty name="$a.src"}
+				<li class="sub-menu-title {if condition='strpos($a.src,$params.url) nheq false'} active{/if}"><a href="/{$a.src}"><i class="iconfont {$a.icon}"></i><span class="text">{$a.title}</span></a></li>
+				{else/}
+				<li class="sub-menu-title"><a href="javascript:;"><i class="iconfont {$a.icon}"></i><span class="text">{$a.title}</span></a></li>
+				{/notempty}
+				{notempty name="$a.list"}
+					{foreach name="$a.list" item="b"}
+						{notempty name="$b.src"}
+						<li class="sub-menu-li {if condition='strpos($b.src,$params.url) nheq false'} active{/if}"><a href="/{$b.src}"><span class="text">{$b.title}</span></a></li>
+						{else/}
+						<li class="sub-menu-li"><a href="javascript:;"><span class="text">{$b.title}</span></a></li>
+						{/notempty}
+					{/foreach}
+				{/notempty}
+			{/foreach}
+			</ul>
+		</div>
+		<div class="menu-bar">
+			<div class="menu-bar-content">
+				<div class="line"></div>
+			</div>
+		</div>
+	</div>

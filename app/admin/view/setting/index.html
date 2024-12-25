@@ -1,0 +1,131 @@
+{extend name="../../base/view/common/base" /}
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+  <a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+  <a><cite>系统设置</cite></a>
+</span>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="main-content">
+	<div class="sub-menu" style="width: 200px;">
+		{include file="../../base/view/common/submenu" /}
+		<div class="menu-bar">
+			<div class="menu-bar-content">
+				<div class="line"></div>
+			</div>
+		</div>
+	</div>
+	<div class="main-bg-content">		
+		<div class="layui-card">
+			<div class="table-title">系统信息</div>
+			<div class="layui-card-body">
+				<table class="layui-table">
+					<tr>
+						<td class="layui-td-gray">系统名称</td>
+						<td>
+							{notempty name="$config.admin_title"}{$config.admin_title}{/notempty}
+						</td>
+						<td rowspan="3" class="layui-td-gray-2">LOGO</td>
+						<td rowspan="3" style="width: 240px;">
+							<div class="layui-upload" style="width: 240px;">
+								<img src='{notempty name="$config.logo"}{$config.logo}{/notempty}' style="max-width: 100%; width: 100%;" />
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray">网站域名</td>
+						<td>
+							{notempty name="$config.domain"}{$config.domain}{/notempty}
+						</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray">网站名称</td>
+						<td>
+							{notempty name="$config.title"}{$config.title}{/notempty}
+						</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray">ICP备案号</td>
+						<td>
+							{notempty name="$config.icp"}{$config.icp}{/notempty}
+						</td>
+						<td class="layui-td-gray">公安备案号</td>
+						<td>
+							{notempty name="$config.beian"}{$config.beian}{/notempty}
+						</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray">版权信息</td>
+						<td>
+							{notempty name="$config.copyright"}{$config.copyright}{/notempty}
+						</td>
+						<td class="layui-td-gray">代码版本号
+						</td>
+						<td>
+							{notempty name="$config.version"}{$config.version}{/notempty}
+						</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray">简介</td>
+						<td colspan="3">
+							{notempty name="$config.desc"}{$config.desc} {/notempty}
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<div class="layui-card">
+			<div class="table-title">服务器信息</div>
+			<div class="layui-card-body">
+				<table class="layui-table" lay-skin="" lay-size="sm">
+					{if condition="($install == true)"}
+					<tr>
+						<td colspan="4" style="color: #E94335; background-color:#f5f5f5">提醒：发现app目录下的install文件夹没删除，为了系统的安全,请手动去删除。</td>
+					</tr>
+					{/if}
+					<tr>
+						<td class="layui-td-gray-2">服务器系统</td>
+						<td>{:get_system_info('os')}</td>
+						<td class="layui-td-gray-2">PHP版本</td>
+						<td>{:get_system_info('php')}</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray-2">上传限制</td>
+						<td>{:get_system_info('upload_max_filesize')}</td>
+						<td class="layui-td-gray-2">执行限制</td>
+						<td>{:get_system_info('max_execution_time')}</td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray-2">ThinkPHP</td>
+						<td colspan="3">{$TP_VERSION}<a class="layui-badge layui-bg-blue" style="margin-left:10px"
+								href="https://www.kancloud.cn/manual/thinkphp6_0" target="_blank">TP6文档</a></td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray-2">Layui</td>
+						<td colspan="3">{:LAYUI_VERSION}<a class="layui-badge layui-bg-blue" style="margin-left:10px"
+								href="https://www.layui.site/doc/" target="_blank">Layui文档</a></td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray-2">勾股DEV</td>
+						<td colspan="3">{:CMS_VERSION}<a class="layui-badge layui-bg-blue" style="margin-left:10px"
+							href="https://blog.gougucms.com/home/book/detail/bid/7.html" target="_blank">勾股DEV文档</a></td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray-2">BUG反馈</td>
+						<td colspan="3"><a href="mailto:hdm58@qq.com" target="_blank">hdm58@qq.com</a></td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray-2">QQ交流群</td>
+						<td colspan="3">搜Q群：24641076，或点击 <a href="https://jq.qq.com/?_wv=1027&k=pxshRv6I" target="_blank" rel="nofollow"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="gougucms交流群" title="gougucms交流群" style="vertical-align:middle"></a></td>
+					</tr>
+					<tr>
+						<td class="layui-td-gray-2">同系开源软件</td>
+						<td colspan="3"><a class="layui-badge layui-bg-blue" style="margin-right:16px" href="https://gitee.com/gougucms/gougucms" target="_blank">勾股CMS</a><a class="layui-badge layui-bg-blue" style="margin-right:16px" href="https://gitee.com/gougucms/blog" target="_blank">勾股BLOG</a><a class="layui-badge layui-bg-blue" style="margin-right:16px" href="https://gitee.com/gougucms/office" target="_blank">勾股OA</a></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}

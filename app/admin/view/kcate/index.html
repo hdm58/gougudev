@@ -1,0 +1,95 @@
+{extend name="../../base/view/common/base" /}
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+  <a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+  <a href="/home/user/setting">信息设置</a>
+  <a><cite>知识类型</cite></a>
+</span>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="main-content">
+	{include file="../../base/view/common/submenu" /}
+	<div class="main-page-content">
+		<div class="layui-form-bar">
+			<button class="layui-btn layui-btn-sm add-menu">+ 添加分类</button>
+		</div>
+		<div>
+		  <table class="layui-hide" id="treeTable" lay-filter="treeTable"></table>
+		</div> 
+	</div>
+</div>
+<script type="text/html" id="switchStatus">
+	<input type="checkbox" name="status" value="{{d.id}}" lay-skin="switch" lay-text="是|否" lay-filter="status" {{ d.status == 1 ? 'checked' : '' }}>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+const moduleInit = ['tool','treeGrid'];
+	function gouguInit() {
+	var treeGrid = layui.treeGrid,
+		layer = layui.layer,
+		tool = layui.tool,
+		ptable = treeGrid.render({
+			id:'treeTable'
+			,elem: '#treeTable'
+				,idField:'id'
+				,url: "/admin/kcate/index"
+				,method :"get"
+				,cellMinWidth: 100
+				,treeId:'id'//树形id字段名称
+				,treeUpId:'pid'//树形父id字段名称
+				,treeShowName:'title'//以树形式显示的字段
+				,heightRemove:[".dHead",24]//不计算的高度,表格设定的是固定高度，此项不生效
+				,cols: [[
+					{field:'id',width:80, title: 'ID号', align:'center'}
+					,{field: 'sort', title: '排序',align:'center', width:80}
+					,{field:'title', edit:'text',width:240, title: '分类名称'}
+					,{field:'pid', title: '父级ID', width:80, align:'center'}
+					,{field:'desc', title: '描述', }
+					,{width:160,title: '操作', align:'center',templet: function(d){
+						var html = '<span class="layui-btn-group"><button class="layui-btn layui-btn-xs" lay-event="add">添加子分类</button><button class="layui-btn  layui-btn-normal layui-btn-xs" lay-event="edit">编辑</button><button class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</button></span>';
+					return html;
+					  }
+					}
+				]]
+				,page:false
+				//,skin:'line'
+			});
+			
+			//表头工具栏事件
+			$('.add-menu').on('click', function(){
+				tool.open('/admin/kcate/add','900px');
+				return;
+			});
+			
+			//操作按钮
+			treeGrid.on('tool(treeTable)', function (obj) {
+				if (obj.event === 'add') {
+					tool.open('/admin/kcate/add?pid='+obj.data.id);
+					return;
+				}
+				if (obj.event === 'edit') {
+					tool.open('/admin/kcate/add?id='+obj.data.id);
+					return;
+				}
+				if (obj.event === 'del') {
+					layer.confirm('确定要删除吗?', { icon: 3, title: '提示' }, function (index) {
+						let callback = function (e) {
+							layer.msg(e.msg);
+							if (e.code == 0) {
+								obj.del();
+							}
+						}
+						tool.delete("/admin/kcate/delete",{ id: obj.data.id },callback);
+						layer.close(index);
+					});
+				}
+			});
+		}
+	</script>
+{/block}
+<!-- /脚本 -->

@@ -1,0 +1,1127 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.layui-timeline.pt-2 .layui-timeline-item{padding-bottom:12px;text-decoration:line-through; color:#acacac; padding-bottom:10px;}
+.layui-timeline.pt-2 .layui-timeline-item.delete-0{text-decoration:none; color:#323232;}
+.check-items{overflow-x: auto; padding: 2px 0;}
+.flow-flex-row {box-direction: row;
+	box-orient: horizontal;
+    -webkit-box-orient: horizontal;
+    -ms-flex-direction: row;
+    flex-direction: row;
+}
+.flow-flexbox { width: 100%;text-align: left;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    display: -webkit-flex;
+    box-align: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+	flex-wrap: wrap;
+}
+.check-item{width: auto; -ms-flex-negative: 0; flex-shrink: 0; padding:4px 0;}
+.check-item i{font-size:20px; margin-right:3px;}
+.check-item span{color:#999;margin:0 1px;}
+.layui-icon[data-ok]{color:#34a853}
+.layui-icon[data-no]{color:#FF5722;}
+.layui-icon[data-on]{color:#4285f4;}
+.check-item-status{color:#969696; font-size:12px; margin-left:3px;}
+.check-item:last-child .layui-icon-right{display:none;}
+</style>
+{/block}
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+	<a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+	<a href="/project/index/index">项目中心</a>
+	<a><cite>项目详情『{$detail.name}』</cite></a>
+</span>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="main-content" style="min-height:100%; height:auto;">
+	{include file="/index/submenu" /}
+	<div id="pageBox" class="main-page-content p-3" style="background-color:#F5F8FA;padding-bottom: 0;">
+		<div class="layui-row">
+			<div class="layui-col-xs12">
+				<div class="layui-card">
+					<div class="layui-card-header" style="height:45px;">
+						<div class="layui-row">
+							<div class="layui-col-md9">
+								<h4 class="hover-edit"><span id="name_{$detail.id}" data-val="">{$detail.name}</span><i class="iconfont icon-wodedianping" title="编辑" data-id="{$detail.id}" data-name="name"></i></h4>
+							</div>
+							<div class="layui-col-md3" style="text-align:right">
+								{eq name="$role" value="2"}
+								<button type="button" class="layui-btn layui-btn-danger layui-btn-sm" id="delProject">删除项目</button>
+								{/eq}
+							</div>
+						</div>
+					</div>
+					<div class='layui-card-body {$role=="0"?"hover-view":"hover-edit"}'>
+						<div class="py-1">
+							<span class="font-gray">项目编号：</span>M{$detail.id}
+
+							<span class="font-gray" style="margin-left:32px">创建人：</span>{$detail.admin_name}
+
+							<span class="font-gray" style="margin-left:32px">负责人：</span>
+							<span id="director_uid_{$detail.id}" data-val="{$detail.director_uid}">{$detail.director_name|default=''}</span>
+							<i class="iconfont icon-wodedianping" title="编辑" data-id="{$detail.id}" data-name="director_uid"></i>
+
+							<span class="font-gray" style="margin-left:32px">计划完成周期：</span>
+							<span id="start_time_{$detail.id}" data-val="">{$detail.start_time|date='Y-m-d'}</span>
+							<i class="iconfont icon-wodedianping" title="修改计划开始日期" 	data-name="start_time"></i> 至&nbsp;&nbsp;&nbsp;&nbsp; <span id="end_time_{$detail.id}"
+								data-val="">{$detail.end_time| date='Y-m-d'}</span><i class="iconfont icon-wodedianping"
+								title="修改计划结束日期" data-name="end_time"></i>
+							<span class="font-gray" style="margin-left:32px">项目状态：</span>
+							<span class="color-status-{$detail.status}" id="status_{$detail.id}"
+							data-val="{$detail.status}">{$detail.status_name}</span><i
+							class="iconfont icon-wodedianping" title="编辑" data-name="status"></i>
+						</div>
+						<div class="py-1">
+							<span class="font-gray">项目成员：</span>{$detail.team_admin_names}
+							<span class="font-gray" style="margin-left:32px">关联产品：</span>
+							<span id="product_id_{$detail.id}" data-val="{$detail.product_id}">
+								{gt name="$detail.product_id" value="0"}
+								{$detail.product_name}
+								{else/}
+								<span class="font-gray">未设置</span>
+								{/gt}
+							</span>
+							<i class="iconfont icon-wodedianping" title="编辑" data-id="{$detail.id}" data-name="product_id"></i>
+						</div>
+						<div class="py-1">
+							<span class="font-gray"><strong>项目简介</strong><i class="iconfont icon-wodedianping" title="编辑" data-name="md_content" data-id="{$detail.id}"></i></span>
+							<div class="md-content-content" id="md_content_{$detail.id}" data-val="{$detail.md_content|default=''}">{$detail.content|raw}</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="layui-col-xs12">
+				<div class="layui-card">
+					<div class="layui-card-header" style="height:45px;">
+						<div class="layui-row">
+							<div class="layui-col-md6">
+								<h4>项目阶段</h4>
+							</div>
+							{gt name="$role" value="0"}
+							<div class="layui-col-md6" style="text-align:right">
+								<span data-href="/project/index/edit/id/{$detail.id}" class="layui-btn layui-btn-normal layui-btn-sm open-a">编辑项目阶段</span>
+							</div>
+							{/gt}
+						</div>
+					</div>
+					{notempty name="$step" id="vo"}
+					<div class="p-3 border-b">
+						<span class="gray">当前阶段：</span>{$step.flow_name}
+						<span class="gray" style="margin-left:20px">负责人：</span>{$step.check_name}
+						<span class="gray" style="margin-left:20px">成员：</span>{$step.flow_names}
+						<span class="gray" style="margin-left:20px">周期：</span>{$step.start_time|time_format=###,'Y-m-d'} 到 {$step.end_time|time_format=###,'Y-m-d'}
+						{eq name="$step.flow_uid" value="$login_user"}
+						<div class="pt-3">
+							<span class="layui-btn layui-btn-normal layui-btn-sm" data-event="step" data-check="1">确认</span>
+							{gt name="$detail.step_sort" value="0"}
+							<span class="layui-btn layui-btn-danger layui-btn-sm" data-event="step" data-check="2">退回</span>
+							{/gt}
+						</div>
+						{/eq}
+					</div>
+					{/notempty}
+					<div class="px-3 py-1 border-b">
+						<div class="flow-flexbox check-items flow-flex-row">
+							{volist name="$step_array" id="vo"}
+							<div class="flow-flexbox check-item flow-flex-row">
+								{gt name="$vo.sort" value="$detail.step_sort"}
+								<i class="layui-icon layui-icon-time"></i>
+								{/gt}
+								{eq name="$vo.sort" value="$detail.step_sort"}
+								<i class="layui-icon layui-icon-username" data-on=""></i>
+								{/eq}
+								{lt name="$vo.sort" value="$detail.step_sort"}
+								<i class="layui-icon layui-icon-ok-circle" data-ok=""></i>
+								{/lt}
+								<div class="check-item-name">{$vo.flow_name}</div>
+								<div class="check-item-status">{$vo.check_name}</div>
+								<span class="layui-icon layui-icon-right"></span>
+							</div>
+							{/volist}
+						</div>
+					</div>
+					<div class="p-3">
+						<p><strong>阶段流转记录</strong></p>
+						{notempty name="$step_record"}
+							<ul class="layui-timeline pt-2">
+							{volist name="$step_record" id="vo"}		
+								<li class="layui-timeline-item delete-{$vo.delete_time}">
+									<i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+									{if ($vo.status == 0)}
+									<p style="padding-left:24px">{$vo.check_time_str}<span class="black mx-1">{$vo.check_name}</span><span class="mr-1 green">{$vo.status_str}</span>了项目阶段的内容。</p>
+									{elseif ($vo.status == 1)}
+									<p style="padding-left:24px">{$vo.check_time_str}<span class="black mx-1">{$vo.check_name}</span><span class="mr-1 green">{$vo.status_str}</span>了{$vo.flow_name}的工作。</p>
+									{elseif ($vo.status == 2) /}
+									<p style="padding-left:24px">{$vo.check_time_str}<span class="black mx-1">{$vo.check_name}</span>在{$vo.flow_name}执行了<span class="mx-1 red">{$vo.status_str}</span>操作。操作意见：<span class="red">{$vo.content}</span></p>
+									{else /}
+									<p style="padding-left:24px">{$vo.check_time_str}<span class="black mx-1">{$vo.check_name}</span><span class="mr-1 layui-color-{$vo.status}">{$vo.status_str}</span>了该阶段流程。操作意见：<span class="red">{$vo.content}</span></p>
+									{/if}
+									
+								</li>
+							{/volist}
+							</ul>
+						{else/}
+						<div class="layui-data-none">暂无记录</div>
+						{/notempty}
+					</div>
+				</div>
+			</div>
+			
+			
+			<div class="layui-col-xs12">
+				<div class="layui-card">
+					<div class="layui-card-header" style="height:45px;">
+						<div class="layui-row">
+							<div class="layui-col-md6">
+								<h4>项目附件</h4>
+							</div>
+							<div class="layui-col-md6" style="text-align:right">
+								<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" id="fileBtn">上传附件</button>
+							</div>
+						</div>
+					</div>
+					<div class="layui-row p-2" id="fileList">
+						{volist name="file_array" id="vo"}
+							<div class="layui-col-md4">
+								<div class="file-card">
+									<i class="file-icon iconfont icon-ziyuan"></i>
+									<div class="file-title" title="上传人：{$vo.admin_name}">
+										{$vo.name}
+									</div>
+									<div class="file-tool">
+										<a href="{$vo.filepath}" download="{$vo.name}" data-id="{$vo.id}" target="_blank" title="大小：{$vo.filesize/1048576|round=2}MB">
+											<i class="iconfont icon-shujudaoru" style="color: #12bb37;"></i>
+										</a>
+										<i class="btn-delete iconfont icon-shanchu" data-id="{$vo.id}" style="color: #FF5722;"></i>
+									</div>
+								</div>
+							</div>
+						{/volist}
+						{empty name="$file_array" }
+						<div class="content-none">暂无附件</div>
+						{/empty}
+					</div>
+				</div>
+			</div>
+			<div class="layui-col-xs12">
+				<div class="layui-card">
+					<div class="layui-card-header" style="height:45px;">
+						<div class="layui-row">
+							<div class="layui-col-md6">
+								<h4>关联链接</h4>
+							</div>
+							<div class="layui-col-md6" style="text-align:right">
+								<button type="button" class="layui-btn layui-btn-sm layui-btn-sm2" id="linkBtn">新增链接</button>
+							</div>
+						</div>
+					</div>
+					<div class="layui-card-body">
+						<table class="layui-table">
+							<thead>
+								<tr>
+									<th width="50%">链接URL</th>
+									<th width="30%" style="text-align:center">链接说明</th>
+									<th width="10%" style="text-align:center">添加人</th>
+									<th width="10%" style="text-align:center">操作</th>
+								</tr>
+							</thead>
+							<tbody id="linkList">
+								{volist name="link_array" id="vo"}
+								<tr>
+									<td><a href="{$vo.url}" target="_blank">{$vo.url}</a></td>
+									<td>{$vo.desc}</td>
+									<td style="text-align: center;">{$vo.admin_name}</td>
+									<td style="text-align: center;">
+										<div class="layui-btn-group" style="width:66px">
+											<button type="button" class="layui-btn layui-btn-xs link-edit" data-id="{$vo.id}" data-url="{$vo.url}" data-desc="{$vo.desc}"><i class="layui-icon"></i></button>
+											<button type="button" class="layui-btn layui-btn-danger layui-btn-xs link-delete" data-id="{$vo.id}"><i class="layui-icon"></i></button>
+										</div>
+									</td>
+								</tr>
+								{/volist}
+								{empty name="$link_array" }
+								<tr>
+									<td colspan="4" class="content-none">暂无链接</td>
+								</tr>
+								{/empty}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="layui-col-xs6 layui-col-md3">
+				<div class="layui-card">
+					<div class="layui-card-header">
+						<h4>项目概况</h4>
+					</div>
+					<div class="layui-card-body">
+						<div style="width:100%; height:200px;">
+							{volist name="$detail.task_cate" id="vo"}
+							<dl>
+								<dt class="layui-card-tips">{$vo.title}任务</dt>
+								<dd class="layui-card-value" title="已完成/总任务数">{$vo.unfinish} / {$vo.count}</dd>
+							</dl>
+							{/volist}
+							<dl>
+								<dt class="layui-card-tips">工作记录</dt>
+								<dd class="layui-card-value" title="工作记录数">{$detail.schedules}</dd>
+							</dl>
+							<dl>
+								<dt class="layui-card-tips">项目工时</dt>
+								<dd class="layui-card-value" title="实际工时/计划工时">{$detail.hours} / {$detail.plan_hours}</dd>
+							</dl>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="layui-col-xs6 layui-col-md4">
+				<div class="layui-card">
+					<div class="layui-card-header">
+						<h4>项目进度</h4>
+					</div>
+					<div class="layui-card-body">
+						<div class="layui-row">
+							<div class="layui-col-md6">
+								<div id="progress" class="data-none" style="width:100%; height:200px;"></div>
+							</div>
+							<div class="layui-col-md6">
+								<div id="delay" class="data-none" style="width:100%; height:200px;"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="layui-col-xs6 layui-col-md5">
+				<div class="layui-card">
+					<div class="layui-card-header">
+						<h4>项目缺陷</h4>
+					</div>
+					<div class="layui-card-body">
+						<div id="rose" class="data-none" style="width:100%; height:200px;"></div>
+					</div>
+				</div>
+			</div>
+			<div class="layui-col-xs6 layui-col-md12">
+				<div class="layui-card">
+					<div class="layui-card-header">
+						<h4>项目燃尽图</h4>
+					</div>
+					<div class="layui-card-body">
+						<div id="cross" class="data-none" style="width:100%; height:360px;"
+							data-tips="任务数：{$detail.tasks}，已完成：{$detail.tasks_finish}，未完成：{$detail.tasks_unfinish}">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="layui-col-xs6 layui-col-md6">
+				<div class="layui-card">
+					<div class="layui-card-header">
+						<h4>任务分配情况</h4>
+					</div>
+					<div class="layui-card-body">
+						<div id="plan" class="data-none" style="width:100%; height:150px;"></div>
+					</div>
+				</div>
+			</div>
+			<div class="layui-col-xs6 layui-col-md6">
+				<div class="layui-card">
+					<div class="layui-card-header">
+						<h4>工时登记情况</h4>
+					</div>
+					<div class="layui-card-body">
+						<div id="work" class="data-none" style="width:100%; height:150px;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script src="{__GOUGU__}/third_party/echart/echarts.min.js"></script>
+<script>
+	var project_id = '{$detail.id}';
+	var project_start_time = '{$detail.start_time| date="Y-m-d"}';
+	const opsData = {
+		status: [
+			{ 'id': 1, 'title': '未开始' },
+			{ 'id': 2, 'title': '进行中' },
+			{ 'id': 3, 'title': '已完成' },
+			{ 'id': 4, 'title': '已关闭' }
+		]
+	}
+
+	var chartProgress = document.getElementById('progress');
+	var progressChart = echarts.init(chartProgress);
+	var optionA;
+	optionA = {
+		backgroundColor: "#ffffff",
+		title: {
+			text: '67.45%',//主标题文本
+			subtext: '任务完成率',//副标题文本
+			x: 'center',
+			y: '39%',
+			textStyle: {
+				fontWeight: 'normal',
+				fontSize: 18,
+				color: '#FF974C',
+				align: 'center'
+			},
+			subtextStyle: {
+				fontSize: 12,
+				color: '#6c7a89',
+			}
+		},
+		tooltip: {
+			trigger: "item",
+			formatter: '{b}：<br/><strong>{c}</strong>',
+			show: true,
+		},
+		series: [
+			{
+				type: 'pie',
+				radius: ['60%', '80%'],
+				center: ['50%', '50%'],
+				avoidLabelOverlap: false,
+				label: {
+					show: false
+				},
+				data: [
+					{ value: 1048, name: '待处理' },
+					{ value: 735, name: '已完成' }
+				]
+			}
+		]
+	};
+
+	var chartDelay = document.getElementById('delay');
+	var delayChart = echarts.init(chartDelay);
+	var optionB;
+	optionB = {
+		backgroundColor: "#ffffff",
+		title: {
+			text: '40.25%',//主标题文本
+			subtext: '任务延迟率',//副标题文本
+			x: 'center',
+			y: '39%',
+			textStyle: {
+				fontWeight: 'normal',
+				fontSize: 18,
+				color: '#FF974C',
+				align: 'center',
+				marginLeft: '-10px'
+			},
+			subtextStyle: {
+				fontSize: 12,
+				color: '#6c7a89',
+			}
+		},
+		tooltip: {
+			trigger: "item",
+			formatter: '{b}：<br/><strong>{c}</strong>',
+			show: true,
+		},
+		series: [
+			{
+				type: 'pie',
+				radius: ['60%', '80%'],
+				center: ['50%', '50%'],
+				avoidLabelOverlap: false,
+				label: {
+					show: false
+				},
+				data: [{
+					value: 1048,
+					name: '延误',
+					itemStyle: {
+						color: "#ED6666",
+					}
+				},
+				{
+					value: 735,
+					name: '按时完成',
+					itemStyle: {
+						color: "#91CC75",
+					}
+				}
+				]
+			}
+		]
+	};
+
+
+	var chartRose = document.getElementById('rose');
+	var roseChart = echarts.init(chartRose);
+	var optionC;
+
+	optionC = {
+		backgroundColor: "#ffffff",
+		legend: {
+			orient: 'vertical',
+			left: 'left'
+		},
+		tooltip: {
+			trigger: 'item',
+			formatter: '{a} <br/>{b} : {c} ({d}%)'
+		},
+		series: [
+			{
+				name: 'Bugfixed',
+				type: 'pie',
+				radius: ['25%', '75%'],
+				center: ['60%', '50%'],
+				data: [
+					{ value: 40, name: '待解决' },
+					{ value: 38, name: '进行中' },
+					{ value: 32, name: '已解决' },
+					{ value: 28, name: '不解决' },
+					{ value: 26, name: '已关闭' }
+				]
+			}
+		]
+	};
+
+
+	var chartCross = document.getElementById('cross');
+	var crossChart = echarts.init(chartCross);
+	var optionD;
+	var tips = $('#cross').data('tips');
+	optionD = {
+		backgroundColor: "#ffffff",
+		color: ['#8C92A4', '#2C7EF8'],
+		title: {
+			text: '',
+			subtext: tips,
+			top: -10,
+		},
+		tooltip: {
+			trigger: 'axis',
+			axisPointer: {
+				type: 'cross',
+				label: {
+					backgroundColor: '#6a7985'
+				}
+			}
+		},
+		legend: {
+			data: ['任务计划剩余', '任务实际剩余']
+		},
+		grid: {
+			top: 36,
+			left: 8,
+			right: 36,
+			bottom: 0,
+			containLabel: true
+		},
+		xAxis: [
+			{
+				type: 'category',
+				boundaryGap: false,
+				splitLine: {
+					show: true,
+					lineStyle: {
+						type: 'dashed'
+					}
+				}
+			}
+		],
+		yAxis: [{
+			axisLine: {
+				show: true
+			},
+			boundaryGap: false,
+			splitLine: {
+				show: true,
+				lineStyle: {
+					type: 'dashed'
+				}
+			},
+			type: 'value'
+		}
+		]
+	};
+
+
+	var chartPlan = document.getElementById('plan');
+	var planChart = echarts.init(chartPlan);
+	var optionE;
+
+	optionE = {
+		backgroundColor: "#ffffff",
+		title: {
+			top: 0,
+			left: 0,
+			text: ''
+		},
+		tooltip: {
+			padding: 6,
+			formatter: function (obj) {
+				var value = obj.value;
+				var tips = '<div style="font-size: 12px;">' + value[0] + '<br>';
+				tips += '共 ' + value[1] + ' 个工作任务';
+				tips += '</div>';
+				return tips;
+			}
+		},
+		visualMap: {
+			min: 0,
+			max: 10,
+			show: false,
+			inRange: {
+				color: ['#fafafa', '#20BF3F']
+			}
+		},
+		calendar: {
+			top: 24,
+			left: 36,
+			right: 4,
+			cellSize: ['auto', 16],
+			range: ['2022-03-01', '2022-08-01'],
+			splitLine: {
+				lineStyle: {
+					color: '#333',
+					type: 'dashed',
+				}
+			},
+			itemStyle: {
+				borderWidth: 0.5
+			},
+			yearLabel: { show: false },
+			monthLabel: {
+				nameMap: 'cn',
+				fontSize: 12
+			},
+			dayLabel: {
+				show: true,
+				formatter: '{start}  1st',
+				fontWeight: 'lighter',
+				nameMap: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
+				fontSize: 12
+			}
+		},
+		series: {
+			type: 'heatmap',
+			coordinateSystem: 'calendar',
+			data: []
+		}
+	};
+
+
+	var chartWork = document.getElementById('work');
+	var workChart = echarts.init(chartWork);
+	var optionF;
+
+	optionF = {
+		backgroundColor: "#ffffff",
+		title: {
+			top: 0,
+			left: 0,
+			text: ''
+		},
+		tooltip: {
+			padding: 6,
+			formatter: function (obj) {
+				var value = obj.value;
+				var tips = '<div style="font-size: 12px;">' + value[0] + '<br>';
+				tips += '共 ' + value[1] + ' 个工时';
+				tips += '</div>';
+				return tips;
+			}
+		},
+		visualMap: {
+			min: 0,
+			max: 10,
+			show: false,
+			inRange: {
+				color: ['#fafafa', '#359AEF']
+			}
+		},
+		calendar: {
+			top: 24,
+			left: 36,
+			right: 4,
+			cellSize: ['auto', 16],
+			range: ['2022-03-01', '2022-08-01'],
+			splitLine: {
+				lineStyle: {
+					color: '#333',
+					type: 'dashed',
+				}
+			},
+			itemStyle: {
+				borderWidth: 0.5
+			},
+			yearLabel: { show: false },
+			monthLabel: {
+				nameMap: 'cn',
+				fontSize: 12
+			},
+			dayLabel: {
+				show: true,
+				formatter: '{start}  1st',
+				fontWeight: 'lighter',
+				nameMap: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
+				fontSize: 12
+			}
+		},
+		series: {
+			type: 'heatmap',
+			coordinateSystem: 'calendar',
+			data: []
+		}
+	};
+
+
+	function getCalendarData(arr) {
+		var rangeArray = [];
+		for (var property in arr) {
+			rangeArray.push(property);
+		}
+		var rangeArray = [rangeArray[0], rangeArray[rangeArray.length - 1]];
+		var start = +echarts.number.parseDate(rangeArray[0]);
+		var end = +echarts.number.parseDate(rangeArray[1]);
+		if (start + 7776000000 > end) {
+			end = start + 8640000000;
+			rangeArray[1] = echarts.format.formatTime('yyyy-MM-dd', end);
+		}
+		var dayTime = 3600 * 24 * 1000;
+		var data = [];
+		for (var time = start; time < end; time += dayTime) {
+			var this_date = echarts.format.formatTime('yyyy-MM-dd', time);
+			if (arr[this_date]) {
+				data.push([this_date, arr[this_date]]);
+			} else {
+				data.push([this_date, 0]);
+			}
+		}
+		var res = { 'range': rangeArray, 'data': data };
+		return res;
+	}
+
+	//燃尽图统计
+	function cross_count(arr, arr2) {
+		var planArray = [], doArray = [];
+		var today = new Date();
+		var todayStr = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+		for (var a in arr) {
+			planArray.push(a);
+		}
+		var rangeArray = [planArray[0], planArray[planArray.length - 1]];
+		if (arr2 instanceof Array == false) {
+			for (var b in arr2) {
+				doArray.push(b);
+			}
+			if ((+echarts.number.parseDate(doArray[doArray.length - 1])) < (+echarts.number.parseDate(todayStr))) {
+				doArray.push(todayStr);
+			}
+			if ((+echarts.number.parseDate(planArray[planArray.length - 1])) < (+echarts.number.parseDate(doArray[doArray.length - 1]))) {
+				rangeArray[1] = doArray[doArray.length - 1];
+			}
+		}
+		var start = +echarts.number.parseDate(rangeArray[0]);
+		var end = +echarts.number.parseDate(rangeArray[1]);
+		var todayInt = +echarts.number.parseDate(todayStr);
+		var dayTime = 3600 * 24 * 1000;
+		var xArray = [], yArray = [], yArray2 = [], done = 0, doneArray = [];
+		for (var time = start; time <= end; time += dayTime) {
+			var this_date = echarts.format.formatTime('yyyy-MM-dd', time);
+			xArray.push(this_date);
+			var plan = cross_recursion(time, end, arr);
+			yArray.push(plan);
+
+			if (arr2[this_date]) {
+				done += arr2[this_date];
+			}
+			if (time <= todayInt) {
+				doneArray.push(done);
+			}
+		}
+		for (var i = 0; i < doneArray.length; i++) {
+			yArray2.push(yArray[0] - doneArray[i]);
+		}
+		var start_time = +echarts.number.parseDate(project_start_time), tem_x_array = [], tem_y_array = [];
+		if (start_time < start) {
+			for (var tem_time = start_time; tem_time < start; tem_time += dayTime) {
+				var this_date = echarts.format.formatTime('yyyy-MM-dd', tem_time);
+				tem_x_array.push(this_date);
+				tem_y_array.push(yArray[0]);
+			}
+			xArray = tem_x_array.concat(xArray);
+			yArray = tem_y_array.concat(yArray);
+			yArray2 = tem_y_array.concat(yArray2);
+		}
+		return { 'x': xArray, 'y': yArray, 'y2': yArray2 };
+	}
+
+	function cross_recursion(start, end, arr) {
+		var count = 0;
+		var dayTime = 3600 * 24 * 1000;
+		for (var time = start; time <= end; time += dayTime) {
+			var this_date = echarts.format.formatTime('yyyy-MM-dd', time);
+			if (arr[this_date]) {
+				count += arr[this_date];
+			}
+		}
+		return count;
+	}
+
+	const moduleInit = ['tool','gouguEdit','gouguComment','gouguSchedule','employeepicker','editormd'];
+	function gouguInit() {
+		const layer = layui.layer,tool = layui.tool, edit = layui.gouguEdit, comment = layui.gouguComment, upload = layui.upload;
+
+		$('#subMenu').on('click', '[data-event="subpage"]', function () {
+			let page = $(this).data('page');
+			$('#subMenu').find('li').removeClass('active');
+			$(this).addClass('active');
+			tool.page(page);
+		})
+
+		$('#subMenu').on('click', '[data-event="open"]', function () {
+			let url = $(this).data('url');
+			tool.open(url);
+		})
+
+		$('.hover-edit').hover(function () {
+			$(this).addClass('hover-on');
+		}, function () {
+			$(this).removeClass('hover-on');
+		})
+
+		$('.hover-edit').on('click', 'i', function () {
+			let name = $(this).data('name');
+			let show_txt = $('#' + name + '_' + project_id).text().replace(/[\r\n\t]/g, "");
+			let real_txt = $('#' + name + '_' + project_id).data('val');
+			if (real_txt === '') {
+				real_txt = show_txt;
+			}
+			editShow(project_id, name, show_txt, real_txt);
+		})
+
+		let loading = false;
+		let editPost = function (id, name, show_val, real_val) {
+			let callback = function (e) {
+				layer.closeAll();
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					setTimeout(function () {
+						location.reload();
+					}, 1000)
+				}
+			}
+			let postData = { id: id };
+			postData[name] = real_val;
+			if (name == 'md_content') {
+				postData['content'] = show_val;
+			}
+			tool.post("/project/index/edit", postData, callback);
+		}
+
+		function editShow(id, name, show_txt, real_txt) {
+			if (loading == true) {
+				return false;
+			}
+			if (name == "name") {
+				edit.text(id, name, real_txt, editPost);
+			}
+			if (name == "start_time" || name == "end_time") {
+				edit.date(id, name, real_txt, editPost);
+			}
+			if (name == "director_uid") {
+				edit.employee_one(id, name, show_txt, real_txt, editPost);
+			}
+			if (name == "status") {
+				edit.dropdown(id, name, real_txt, opsData[name], editPost);
+			}
+			if (name == "product_id") {
+				loading = true;
+				tool.get("/api/index/get_product", {}, function (res) {
+					let data = res.data;
+					loading = false;
+					edit.dropdown(id, name, real_txt, data, editPost, 1);
+				});
+			}
+			if (name == "md_content") {
+				edit.editor(id, name, real_txt, editPost);
+			}
+		}
+		
+
+		$('#delProject').on('click', function () {
+			layer.confirm('确定要删除该项目吗？请慎重', { icon: 3, title: '提示' }, function (index) {
+				let callback = function (e) {
+					layer.closeAll();
+					layer.msg(e.msg);
+					if(e.code==0){
+						setTimeout(function () {
+							location.href='/project/index/index';
+						}, 1000)
+					}
+				}
+				let postData = { "id": project_id };
+				tool.delete("/project/index/delete", postData, callback);
+			});
+		})
+		
+		$('body').on('click','[data-event="step"]',function(){
+			let check = $(this).data('check');
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if(e.code==0){
+					setTimeout(function(){
+						location.reload();
+					},2000)
+				}
+			}
+			if(check == 2){
+				layer.open({
+					type: 1,
+					title: '请输入退回的原因或理由',
+					area: ['800px', '360px'],
+					content: '<div style="padding:5px;"><textarea class="layui-textarea" id="remarkTextarea" style="width: 100%; height: 240px;"></textarea></div>',
+					btnAlign: 'c',
+					btn: ['提交保存'],
+					yes: function () {
+						let remark = $("#remarkTextarea").val();
+						if (remark != '') {
+							tool.post("/api/project/step_check", {id: project_id,check:check,content:remark}, callback);
+						} else {
+							layer.msg('请输入原因或理由');
+						}
+					}
+				})
+			}
+			else{
+				layer.confirm('确认已完成该阶段工作，进入下个阶段？', {
+					icon: 3,
+					title: '提示'
+				},
+				function(index) {
+					tool.post("/api/project/step_check", {id: project_id,check:check}, callback);
+				})
+			}
+		});
+
+		upload.render({
+			elem: '#fileBtn'
+			, url: '/api/index/upload'
+			, accept: 'file' //普通文件
+			, exts: 'jpeg|jpg|png|gif|doc|docx|ppt|pptx|xls|xlsx|pdf|zip|rar|7z' //只允许上传文件
+			, before: function (obj) {
+				layer.msg('上传中...', { time: 3600000 });
+			}
+			, done: function (res, index, upload) {
+				let callback = function (e) {
+					layer.msg('上传成功');
+					setTimeout(function(){
+						location.reload();
+					},2000)	
+				}
+				let postData = { 'topic_id': project_id, 'file_id': res.data.id, 'file_name': res.data.name, 'module': 'project' };
+				tool.post("/api/appendix/add", postData, callback);
+			}
+			, error: function (index, upload) {
+				layer.msg('上传失败');
+			}
+		});
+
+		$('#fileList').on('click', '.btn-delete', function () {
+			let id = $(this).data('id');
+			layer.confirm('确定要删除该附件吗?', { icon: 3, title: '提示' }, function (index) {
+				let callback = function (e) {
+					layer.closeAll();
+					layer.msg(e.msg);
+					setTimeout(function(){
+						location.reload();
+					},2000)					
+				}
+				let postData = { "id": id };
+				tool.delete("/api/appendix/delete", postData, callback);
+			});
+		})
+
+		$('#linkBtn').on('click', function () {
+			comment.addLink(0, project_id, 'project', '', '');
+		})
+		$('#linkList').on('click', '.link-edit', function () {
+			let id = $(this).data('id');
+			let url = $(this).data('url');
+			let desc = $(this).data('desc');
+			comment.addLink(id, project_id, 'project', url, desc);
+		})
+		$('#linkList').on('click', '.link-delete', function () {
+			let id = $(this).data('id');
+			layer.confirm('确定要删除该链接吗?', { icon: 3, title: '提示' }, function (index) {
+				let callback = function (e) {
+					layer.closeAll();
+					layer.msg(e.msg);
+					setTimeout(function(){
+						location.reload();
+					},2000)	
+				}
+				let postData = { "id": id };
+				tool.delete("/api/appendix/delete_link", postData, callback);
+			});
+		})
+
+		let callback = function (res) {
+			if (res.data.date_tasks instanceof Array == false) {
+				optionA.title.text = res.data.task_pie.ok_lv + '%';
+				optionA.series = [
+					{
+						type: 'pie',
+						radius: ['60%', '80%'],
+						center: ['50%', '50%'],
+						avoidLabelOverlap: false,
+						label: {
+							show: false
+						},
+						data: [
+							{ value: res.data.task_pie.count - res.data.task_pie.count_ok, name: '待处理' },
+							{ value: res.data.task_pie.count_ok, name: '已完成' }
+						]
+					}
+				];
+				optionA && progressChart.setOption(optionA);
+
+				optionB.title.text = res.data.task_pie.delay_lv + '%';
+				optionB.series = [
+					{
+						type: 'pie',
+						radius: ['60%', '80%'],
+						center: ['50%', '50%'],
+						avoidLabelOverlap: false,
+						label: {
+							show: false
+						},
+						data: [{
+							value: res.data.task_pie.delay,
+							name: '延误',
+							itemStyle: {
+								color: "#ED6666",
+							}
+						},
+						{
+							value: res.data.task_pie.count - res.data.task_pie.delay,
+							name: '按时完成',
+							itemStyle: {
+								color: "#91CC75",
+							}
+						}
+						]
+					}
+				];
+				optionB && delayChart.setOption(optionB);
+
+				optionC.series = [
+					{
+						name: 'Bugfixed',
+						type: 'pie',
+						radius: ['25%', '75%'],
+						center: ['60%', '50%'],
+						data: [
+							{ value: res.data.bug_status.status_a, name: '待解决' },
+							{ value: res.data.bug_status.status_b, name: '进行中' },
+							{ value: res.data.bug_status.status_c, name: '已解决' },
+							{ value: res.data.bug_status.status_d, name: '不解决' },
+							{ value: res.data.bug_status.status_e, name: '已关闭' }
+						]
+					}
+				]
+				optionC && roseChart.setOption(optionC);
+
+
+				var dataD = cross_count(res.data.date_tasks, res.data.date_tasks_ok);
+				optionD.xAxis = {
+					type: 'category',
+					boundaryGap: false,
+					splitLine: {
+						show: true,
+						lineStyle: {
+							type: 'dashed'
+						}
+					},
+					data: dataD.x,
+					axisLabel: {
+						rotate: 30,
+						formatter: function (value, index) {
+							return value.slice(5);
+						}
+					}
+				};
+				optionD.series = [
+					{
+						name: '任务计划剩余',
+						type: 'line',
+						showSymbol: false,
+						markLine: {
+							data: [{ type: 'average', name: 'Avg' }],
+						},
+						lineStyle: {
+							width: 2
+						},
+						data: dataD.y
+					},
+					{
+						name: '任务实际剩余',
+						type: 'line',
+						showSymbol: false,
+						areaStyle: {
+							opacity: 0.1
+						},
+						markLine: {
+							data: [{ type: 'average', name: 'Avg' }],
+						},
+						lineStyle: {
+							width: 2
+						},
+						data: dataD.y2
+					}
+				]
+				optionD && crossChart.setOption(optionD)
+
+				var dataE = getCalendarData(res.data.date_tasks);
+				optionE.calendar.range = dataE.range,
+					optionE.series = {
+						type: 'heatmap',
+						coordinateSystem: 'calendar',
+						data: dataE.data
+					}
+				optionE && planChart.setOption(optionE);
+
+				if (res.data.date_schedules instanceof Array == false) {
+					var dataF = getCalendarData(res.data.date_schedules);
+					optionF.calendar.range = dataF.range,
+						optionF.series = {
+							type: 'heatmap',
+							coordinateSystem: 'calendar',
+							data: dataF.data
+						}
+					optionF && workChart.setOption(optionF);
+				}
+			}
+		}
+		tool.get('/api/project/get_chart_data', { 'project_id': project_id }, callback);
+
+		window.onresize = function () {
+			progressChart.resize();
+			delayChart.resize();
+			roseChart.resize();
+			crossChart.resize();
+			planChart.resize();
+			workChart.resize();
+		}
+	}
+</script>
+{/block}
+<!-- /脚本 -->

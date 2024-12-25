@@ -1,0 +1,339 @@
+<div class="page-content">
+	<div class="p-4 border-b">
+		<h3 class="h3-title hover-{$role_edit}">
+			<span class="layui-btn layui-btn-xs bg-status-{$detail.status}">{$detail.status_name}</span>
+			<span id="name_{$detail.id}" data-val="">{$detail.name}</span><i class="iconfont icon-wodedianping" title="编辑" data-id="{$detail.id}" data-name="name"></i>
+		</h3>
+		<div>
+			<span class="layui-badge layui-bg-gray">#P{$detail.id}</span>
+			<span class="mx-2">{$detail.admin_name}</span>
+			<span class="font-gray">创建于{$detail.times}<span id="editTips">{gt name="$detail.update_time" value="0"}，最近更新于 {:time_trans($detail.update_time)}{/gt}</span></span>
+			{eq name="$detail.admin_id" value="$params.uid"}
+			<span class="layui-btn layui-btn-xs layui-btn-danger ml-4" id="delBtn"><i class="layui-icon">&#xe640;</i>删除</span>
+			{/eq}
+		</div>
+	</div>
+	<div class="layui-row border-b">
+		<div class="layui-col-md9 p-4 border-r">
+			<table class="layui-table layui-table-form">
+				<tr>
+					<td class="layui-td-gray">负责人</td>
+					<td class="hover-{$role_edit}">
+						<span id="director_uid_{$detail.id}" data-val="{$detail.director_uid}">{$detail.director_name}</span><i class="iconfont icon-wodedianping" title="编辑" data-id="{$detail.id}" data-name="director_uid"></i>
+					</td>
+					<td class="layui-td-gray">状态</td>
+					<td class="hover-{$role_edit}">
+						<span class="color-status-{$detail.status}" id="status_{$detail.id}" data-val="{$detail.status}">{$detail.status_name}</span><i class="iconfont icon-wodedianping" title="编辑" data-name="status"></i>
+					</td>
+					<td class="layui-td-gray">访问控制</td>
+					<td class="hover-{$role_edit}">
+						<span id="is_open_{$detail.id}" data-val="{$detail.is_open}">
+							{eq name="$detail.is_open" value="1" }
+							内部 <span class="font-gray">(仅创建人、负责人、评审人可访问)</span>
+							{/eq}
+							{eq name="$detail.is_open" value="2" }公开 <span class="font-gray">(有产品视图权限员工均可访问)</span>{/eq}
+						</span>
+						<i class="iconfont icon-wodedianping" title="编辑" data-id="{$detail.id}" data-name="is_open"></i>
+					</td>
+				</tr>
+				<tr>
+					<td class="layui-td-gray">评审人</td>
+					<td colspan="5" class="hover-{$role_edit}"><span id="check_admin_ids_{$detail.id}" data-val="{$detail.check_admin_ids}">{$detail.check_admin_names}</span><i class="iconfont icon-wodedianping" title="编辑" data-id="{$detail.id}" data-name="check_admin_ids"></i></td>
+				</tr>
+				<tr>
+					<td colspan="8"></td>
+				</tr>
+				<tr>
+					<td class="layui-td-gray-2 hover-{$role_edit}" style="text-align:left" colspan="6"><strong>产品描述</strong><i class="iconfont icon-wodedianping" title="编辑" data-name="md_content" data-id="{$detail.id}"></i></td>
+				</tr>
+				<tr>
+					<td colspan="6">
+						<div class="md-content-content" id="md_content_{$detail.id}" data-val="{$detail.md_content}">
+						{$detail.content|raw}</div>
+					</td>
+				</tr>
+				<tr>
+					<td class="layui-td-gray-2" style="text-align:left" colspan="8"><strong>文件附件</strong> <button type="button" class="layui-btn layui-btn-xs" id="flieBtn">文件上传</button></td>
+				</tr>
+				<tr>
+					<td colspan="8">
+						<table class="layui-table layui-table-form">
+							<thead>
+								<tr>
+									<th width="60%">文件名</th>
+									<th width="15%" style="text-align:center">文件大小</th>
+									<th width="10%" style="text-align:center">上传人</th>
+									<th width="15%" style="text-align:center">操作</th>
+								</tr>
+							</thead>
+							<tbody id="flieList">
+								{empty name="$file_array" }
+								<tr>
+									<td colspan="4" style="padding:10px 0; color:#999; text-align:center;">暂无文件附件</td>
+								</tr>
+								{else/}
+								{volist name="file_array" id="vo"}
+								<tr>
+									<td>{$vo.name}</td>
+									<td style="text-align: center;">{$vo.filesize/1048576|round=2}MB</td>
+									<td style="text-align: center;">{$vo.admin_name}</td>
+									<td style="text-align: center;">
+										<div class="layui-btn-group"><a class="layui-btn layui-btn-xs "
+												href="{$vo.filepath}" download="{$vo.name}" data-id="{$vo.id}">下载</a>
+											<span class="layui-btn layui-btn-xs layui-btn-danger file-delete"
+												data-uid="{$vo.admin_id}" data-id="{$vo.id}">删除</span>
+										</div>
+									</td>
+								</tr>
+								{/volist}
+								{/empty}
+							</tbody>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td class="layui-td-gray-2" style="text-align:left" colspan="8"><strong>关联链接</strong> <button type="button" class="layui-btn layui-btn-xs" id="linkBtn">新增链接</button></td>
+				</tr>
+				<tr>
+					<td colspan="8">
+						<table class="layui-table layui-table-form">
+							<thead>
+								<tr>
+									<th width="50%">链接</th>
+									<th width="25%" style="text-align:center">说明</th>
+									<th width="10%" style="text-align:center">添加人</th>
+									<th width="15%" style="text-align:center">操作</th>
+								</tr>
+							</thead>
+							<tbody id="linkList">
+								{empty name="$link_array" }
+								<tr>
+									<td colspan="4" style="padding:10px 0; color:#999; text-align:center;">暂无关联链接</td>
+								</tr>
+								{else/}
+								{volist name="link_array" id="vo"}
+								<tr data-id="{$vo.id}" id="link_{$vo.id}">
+									<td><a href="{$vo.url}" target="_blank">{$vo.url}</a></td>
+									<td>{$vo.desc}</td>
+									<td style="text-align: center;">{$vo.admin_name}</td>
+									<td style="text-align: center;">
+										<div class="layui-btn-group"><span class="layui-btn layui-btn-xs link-edit"
+												data-id="{$vo.id}" data-url="{$vo.url}" data-desc="{$vo.desc}">编辑</span>
+											<span class="layui-btn layui-btn-xs layui-btn-danger link-delete"
+												data-uid="{$vo.admin_id}" data-id="{$vo.id}">删除</span>
+										</div>
+									</td>
+								</tr>
+								{/volist}
+								{/empty}
+							</tbody>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="layui-col-md3 p-4">
+			<div class="pb-4"><span class="font-gray">关联项目：</span>{$detail.projects}</div>
+			{volist name="$detail.task_cate" id="vo"}
+			<div class="pb-4"><span class="font-gray">{$vo.title}任务：</span>{$vo.count}</div>
+			{/volist}
+		</div>
+	</div>
+	<div class="layui-tab layui-tab-brief px-4" lay-filter="docDemoTabBrief">
+		<ul class="layui-tab-title">
+			<li class="layui-this">互动评论({$detail.comments})</li>
+			<li>操作日志({$detail.logs})</li>
+		</ul>
+		<div class="layui-tab-content p-0">
+			<div class="layui-tab-item comment-list layui-show">
+				<div class="comment-input my-2">
+					<input type="text" id="commentInput" readonly placeholder="发表一下你的看法" class="layui-input" value="">
+				</div>
+				<div id="comment_product_{$detail.id}"></div>
+			</div>
+			<div class="layui-tab-item logs-list">
+				<div id="log_product_{$detail.id}"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	function openInit() {
+		const detail_id = '{$detail.id}';
+		const opsData = {
+			status: [
+				{ 'id': 0, 'title': '关闭' },
+				{ 'id': 1, 'title': '开启' }
+			]
+		}
+		var layer = layui.layer, tool = layui.tool, edit = layui.gouguEdit, comment = layui.gouguComment, upload = layui.upload;
+
+		$('.hover-edit').hover(function () {
+			$(this).addClass('hover-on');
+		}, function () {
+			$(this).removeClass('hover-on');
+		})
+
+		$('.hover-edit').on('click', 'i', function () {
+			let name = $(this).data('name');
+			let show_txt = $('#' + name + '_' + detail_id).text().replace(/[\r\n\t]/g, "");
+			let real_txt = $('#' + name + '_' + detail_id).data('val');
+			if (real_txt === '') {
+				real_txt = show_txt;
+			}
+			editShow(detail_id, name, show_txt, real_txt);
+		})
+
+		$('#delBtn').on('click', function () {
+			layer.confirm('确定要删除该产品吗？请慎重', { icon: 3, title: '提示' }, function (index) {
+				let callback = function (e) {
+					layer.closeAll();
+					layer.msg(e.msg);
+					if(e.code==0){
+						setTimeout(function () {
+							location.reload();
+						}, 1000)
+					}
+				}
+				let postData = { "id": detail_id };
+				tool.delete("/product/index/delete", postData, callback);
+			});
+		})
+
+		upload.render({
+			elem: '#flieBtn'
+			, url: '/api/index/upload'
+			, accept: 'file' //普通文件
+			, exts: 'jpeg|jpg|png|gif|doc|docx|ppt|pptx|xls|xlsx|pdf|zip|rar|7z' //只允许上传文件
+			, before: function (obj) {
+				layer.msg('上传中...', { time: 3600000 });
+			}
+			, done: function (res, index, upload) {
+				let callback = function (e) {
+					layer.msg('上传成功');
+					tool.load("/product/index/view?id=" + detail_id);
+				}
+				let postData = { 'topic_id': detail_id, 'file_id': res.data.id, 'file_name': res.data.name, 'module': 'product' };
+				tool.post("/api/appendix/add", postData, callback);
+			}
+			, error: function (index, upload) {
+				layer.msg('上传失败');
+			}
+		});
+
+		$('#flieList').on('click', '.file-delete', function () {
+			let id = $(this).data('id');
+			layer.confirm('确定要删除该附件吗?', { icon: 3, title: '提示' }, function (index) {
+				let callback = function (e) {
+					layer.closeAll();
+					layer.msg(e.msg);
+					tool.load("/product/index/view?id=" + detail_id);
+				}
+				let postData = { "id": id };
+				tool.delete("/api/appendix/delete", postData, callback);
+			});
+		})
+
+
+		$('#linkBtn').on('click', function () {
+			comment.addLink(0, detail_id, 'product', '', '');
+		})
+		$('#linkList').on('click', '.link-edit', function () {
+			let id = $(this).data('id');
+			let url = $(this).data('url');
+			let desc = $(this).data('desc');
+			comment.addLink(id, detail_id, 'product', url, desc);
+		})
+		$('#linkList').on('click', '.link-delete', function () {
+			let id = $(this).data('id');
+			layer.confirm('确定要删除该链接吗?', { icon: 3, title: '提示' }, function (index) {
+				let callback = function (e) {
+					layer.closeAll();
+					layer.msg(e.msg);
+					tool.load("/product/index/view?id=" + detail_id);
+				}
+				let postData = { "id": id };
+				tool.delete("/api/appendix/delete_link", postData, callback);
+			});
+		})
+
+		//评论
+		comment.load(detail_id, 'product');
+		$('#commentInput').on('click', function () {
+			comment.editor(0, detail_id, 0, 0, 'product', '');
+		})
+		//回复
+		$('#comment_product_' + detail_id).on('click', '[data-event="replay"]', function () {
+			let pid = $(this).data('id');
+			let padmin_id = $(this).data('uid');
+			comment.editor(0, detail_id, pid, padmin_id, 'product', '');
+		})
+		//编辑
+		$('#comment_product_' + detail_id).on('click', '[data-event="edit"]', function () {
+			let id = $(this).data('id');
+			let mdcontent = $('#comment_' + id).data('mdcontent');
+			comment.editor(id, detail_id, 0, 0, 'product', mdcontent);
+		})
+
+		//删除
+		$('#comment_product_' + detail_id).on('click', '[data-event="del"]', function () {
+			let id = $(this).data('id');
+			comment.del(id, detail_id, 'product');
+		})
+
+		//操作记录
+		comment.log(detail_id, 'product');
+
+		let loading = false;
+		let editPost = function (id, name, show_val, real_val) {
+			let callback = function (e) {
+				if (e.code == 0) {
+					layer.closeAll();
+					tool.load('/product/index/view/id/' + id);
+					if (layui.pageTable) {
+						setTimeout(function () {
+							layui.pageTable.reload();
+						}, 400)
+					}
+				} else {
+					layer.msg(e.msg);
+				}
+			}
+			let postData = { id: id };
+			postData[name] = real_val;
+			if (name == 'md_content') {
+				postData['content'] = show_val;
+			}
+			tool.post("/product/index/add", postData, callback);
+		}
+
+		function editShow(id, name, show_txt, real_txt) {
+			if (loading == true) {
+				return false;
+			}
+			if (name == "name") {
+				edit.text(id, name, real_txt, editPost);
+			}
+			if (name == "director_uid") {
+				edit.employee_one(id, name, show_txt, real_txt, editPost);
+			}
+			if (name == "check_admin_ids") {
+				edit.employee_more(id, name, show_txt, real_txt, editPost);
+			}
+			if (name == "status") {
+				edit.dropdown(id, name, real_txt, opsData[name], editPost);
+			}
+			if (name == "is_open") {
+				let data = [
+					{ 'id': 1, 'title': '内部(仅创建人、负责人、评审人可访问)' },
+					{ 'id': 2, 'title': '公开(有产品视图权限员工均可访问)' }
+				];
+				edit.select_type(id, name, real_txt, data, editPost);
+			}
+			if (name == "md_content") {
+				edit.editor(id, name, real_txt, editPost);
+			}
+		}
+	}
+</script>

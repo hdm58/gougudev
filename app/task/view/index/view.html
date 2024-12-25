@@ -1,0 +1,547 @@
+<div class="page-content">
+	<div class="p-4 border-b">
+		<h3 class="h3-title hover-edit">
+			<span class="layui-btn layui-btn-xs bg-priority-{$detail.priority}">{$detail.priority_name}</span>
+			<span id="title_{$detail.id}" data-val="">{$detail.title}</span>
+			<i class="iconfont icon-wodedianping" title="编辑" data-name="title"></i>
+		</h3>
+		<div>
+			<span class="layui-badge layui-bg-gray">#T{$detail.id}</span>
+			<span class="mx-2">{$detail.admin_name}</span>
+			<span class="font-gray">创建于{$detail.times}<span id="editTips">{gt name="$detail.update_time"
+					value="0"}，最近更新于 {:time_trans($detail.update_time)}{/gt}</span></span>
+			{eq name="$detail.admin_id" value="$params.uid"}
+			<span class="layui-btn layui-btn-xs layui-btn-danger ml-4" id="delBtn"><i
+					class="layui-icon">&#xe640;</i>删除</span>
+			{/eq}
+		</div>
+	</div>
+	<div class="p-3 border-b">
+		<table class="layui-table layui-table-form">
+			<tr>
+				<td class="layui-td-gray">负责人</td>
+				<td class="hover-edit">
+					<span id="director_uid_{$detail.id}" data-val="{$detail.director_uid}">{$detail.director_name|default=''}</span><i class="iconfont icon-wodedianping" title="编辑" data-name="director_uid"></i>
+				</td>
+				<td class="layui-td-gray">协作人</td>
+				<td class="hover-edit">
+					<span id="assist_admin_ids_{$detail.id}" data-val="{$detail.assist_admin_ids}">{$detail.assist_admin_names}</span><i class="iconfont icon-wodedianping" title="编辑" data-name="assist_admin_ids"></i>
+				</td>
+				<td class="layui-td-gray">优先级</td>
+				<td class="hover-edit">
+					<span class="color-priority-{$detail.priority}" id="priority_{$detail.id}" data-val="{$detail.priority}">{$detail.priority_name}</span><i class="iconfont icon-wodedianping" title="编辑" data-name="priority"></i>
+				</td>
+				<td class="layui-td-gray">任务状态</td>
+				<td class="hover-edit">
+					<span class="color-flow-{$detail.flow_status}" id="flow_status_{$detail.id}" data-val="{$detail.flow_status}">{$detail.flow_name}</span><i class="iconfont icon-wodedianping" title="编辑" data-name="flow_status"></i>
+				</td>
+			</tr>
+			<tr>
+				<td class="layui-td-gray">任务类型</td>
+				<td class="hover-edit">
+					<span id="type_{$detail.id}" data-val="{$detail.type}">{$detail.type_name}</span><i class="iconfont icon-wodedianping" title="编辑" data-name="type"></i>
+				</td>
+				<td class="layui-td-gray">任务性质</td>
+				<td class="hover-edit">
+					<span id="is_bug_{$detail.id}" data-val="{$detail.is_bug}">{$detail.is_bug==0?'普通任务(TASK)':'问题缺陷(BUG)'}</span><i class="iconfont icon-wodedianping" title="编辑" data-name="is_bug"></i>
+				</td>
+				<td class="layui-td-gray">工作类型</td>
+				<td class="hover-edit">
+					<span id="cate_{$detail.id}" data-val="{$detail.cate}">{$detail.cate_name}</span><i class="iconfont icon-wodedianping" title="编辑" data-name="cate"></i>
+				</td>	
+				<td class="layui-td-gray">完成进度</td>
+				<td class="hover-edit">
+					<span class="color-done_ratio-{$detail.done_ratio}" id="done_ratio_{$detail.id}" data-val="{$detail.done_ratio}">{$detail.done_ratio}%</span>{lt name="$detail.done_ratio" value="100"}<i class="iconfont icon-wodedianping" title="编辑" data-name="done_ratio"></i>{/lt}
+				</td>					
+			</tr>
+			<tr>
+				<td class="layui-td-gray">预估工时</td>
+				<td class="hover-edit">
+					<span id="plan_hours_{$detail.id}" data-val="">{$detail.plan_hours}</span><i class="iconfont icon-wodedianping" title="编辑" data-name="plan_hours"></i>
+				</td>
+				<td class="layui-td-gray">实际工时</td>
+				<td class="hover-edit">
+					{eq name="$detail.work_hours" value="0"}-{else/}{$detail.work_hours}{/eq}
+				</td>		
+				<td class="layui-td-gray-2">计划完成日期</td>
+				<td class="hover-edit">
+					<span id="end_time_{$detail.id}" data-val="">{$detail.end_time| date='Y-m-d'}</span>{gt name="$detail.delay" value="0"}<span class="layui-badge ml-2">逾期 {$detail.delay} 天</span>{/gt}<i class="iconfont icon-wodedianping" title="编辑" data-name="end_time"></i>
+				</td>
+				<td class="layui-td-gray-2">实际完成日期</td>
+				<td class="hover-edit">
+					{eq name="$detail.over_time" value="0"}-{else/}{$detail.over_time|date='Y-m-d'}{/eq}
+				</td>
+			</tr>
+			<tr>
+				<td class="layui-td-gray-2">关联产品</td>
+				<td colspan="3">
+					{gt name="$detail.project_id" value="0"}{$detail.product_name}{else/}<span class="font-gray">未设置</span>{/gt}
+				</td>
+				<td class="layui-td-gray-2">关联项目</td>
+				<td colspan="3" class="hover-edit">
+					<span id="project_id_{$detail.id}" data-val="{$detail.project_id}">
+						{gt name="$detail.project_id" value="0"}{$detail.project_name}{else/}<span class="font-gray">未设置</span>{/gt}<i class="iconfont icon-wodedianping" title="编辑" data-name="project_id"></i>
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="layui-td-gray-2">子任务<span class="layui-btn layui-btn-xs add-son">+ 新增</span></td>
+				<td colspan="7">					
+					{empty name="$son_task"}
+					<span class="gray">暂无子任务</span>
+					{else/}
+						{volist name="son_task" id="vo"}
+						<p class="task-son"><span class="layui-badge layui-bg-gray">#T{$vo.id}</span><span class="layui-color-{$vo.flow_status}">『{$vo.flow_name}』</span><a class="load-a" data-href="/task/index/view?id={$vo.id}">{$vo.title}</a><span class="del-son red" title="取消父子关系" data-id="{$vo.id}">✘</span></p>
+						{/volist}
+					{/empty}
+				</td>
+			</tr>
+			<tr>
+				<td class="layui-td-gray-2 hover-edit"><strong>任务描述</strong><i class="iconfont icon-wodedianping" title="编辑" data-name="md_content"></i></td>
+				<td colspan="7">
+					<div class="md-content-content" id="md_content_{$detail.id}" data-val="{$detail.md_content}">
+					{$detail.content|raw}</div>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align:left" colspan="8"><strong>工作记录</strong> <button type="button" class="layui-btn layui-btn-xs add-schedule">新增工作记录</button></td>
+			</tr>
+			<tr>
+				<td colspan="8">
+					<table class="layui-table layui-table-form">
+						<thead>
+							<tr>
+								<th width="44%"style="text-align:center">工作内容</th>
+								<th width="24%" style="text-align:center">工作时间范围</th>
+								<th width="8%" style="text-align:center">执行员工</th>
+								<th width="12%" style="text-align:center">记录时间</th>
+								<th width="12%" style="text-align:center">操作</th>
+							</tr>
+						</thead>
+						<tbody id="tableSchedule">
+							{empty name="$schedule_array" }
+							<tr>
+								<td colspan="5" style="padding:10px 0; color:#999; text-align:center;">暂无工作记录</td>
+							</tr>
+							{else/}
+							{volist name="schedule_array" id="vo"}
+							<tr>
+								<td>{$vo.title}</td>
+								<td style="text-align: center;">{$vo.start_time|date='Y-m-d H:i'} 至 {$vo.end_time|date='Y-m-d H:i'}</td>
+								<td style="text-align: center;">{$vo.name}</td>
+								<td style="text-align: center;">{$vo.create_time|date='Y-m-d H:i'}</td>
+								<td style="text-align: center;">
+								<div class="layui-btn-group"><span class="layui-btn layui-btn-xs" data-note="schedule" data-type="edit" data-id="{$vo.id}">修改</span><span class="layui-btn layui-btn-normal layui-btn-xs" data-note="schedule" data-type="view" data-id="{$vo.id}">详细</span><span class="layui-btn layui-btn-danger layui-btn-xs" data-note="schedule" data-type="del" data-id="{$vo.id}">删除</span></div>
+								</td>
+							</tr>
+							{/volist}
+							{/empty}
+						</tbody>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="8"><strong>文件附件</strong> <button type="button" class="layui-btn layui-btn-xs" id="flieBtn">文件上传</button></td>
+			</tr>
+			<tr>
+				<td colspan="8">
+					<table class="layui-table layui-table-form">
+						<thead>
+							<tr>
+								<th width="60%">文件名</th>
+								<th width="15%" style="text-align:center">上传时间</th>
+								<th width="10%" style="text-align:center">上传人</th>
+								<th width="15%" style="text-align:center">操作</th>
+							</tr>
+						</thead>
+						<tbody id="flieList">
+							{empty name="$file_array" }
+							<tr>
+								<td colspan="4" style="padding:10px 0; color:#999; text-align:center;">暂无文件附件</td>
+							</tr>
+							{else/}
+							{volist name="file_array" id="vo"}
+							<tr>
+								<td><span class="gray">『{$vo.filesize/1048576|round=2}MB』</span>{$vo.name}</td>
+								<td style="text-align: center;">{$vo.create_time|date='Y-m-d H:i'}</td>
+								<td style="text-align: center;">{$vo.admin_name}</td>
+								<td style="text-align: center;">
+									<div class="layui-btn-group"><a class="layui-btn layui-btn-xs "
+											href="{$vo.filepath}" download="{$vo.name}" data-id="{$vo.id}">下载</a>
+										<span class="layui-btn layui-btn-xs layui-btn-danger file-delete"
+											data-uid="{$vo.admin_id}" data-id="{$vo.id}">删除</span>
+									</div>
+								</td>
+							</tr>
+							{/volist}
+							{/empty}
+						</tbody>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="8"><strong>关联链接</strong> <button type="button" class="layui-btn layui-btn-xs" id="linkBtn">新增链接</button></td>
+			</tr>
+			<tr>
+				<td colspan="8">
+					<table class="layui-table layui-table-form">
+						<thead>
+							<tr>
+								<th width="50%">链接</th>
+								<th width="25%" style="text-align:center">说明</th>
+								<th width="10%" style="text-align:center">添加人</th>
+								<th width="15%" style="text-align:center">操作</th>
+							</tr>
+						</thead>
+						<tbody id="linkList">
+							{empty name="$link_array" }
+							<tr>
+								<td colspan="4" style="padding:10px 0; color:#999; text-align:center;">暂无关联链接</td>
+							</tr>
+							{else/}
+							{volist name="link_array" id="vo"}
+							<tr data-id="{$vo.id}" id="link_{$vo.id}">
+								<td><a href="{$vo.url}" target="_blank">{$vo.url}</a></td>
+								<td>{$vo.desc}</td>
+								<td style="text-align: center;">{$vo.admin_name}</td>
+								<td style="text-align: center;">
+									<div class="layui-btn-group"><span class="layui-btn layui-btn-xs link-edit"
+											data-id="{$vo.id}" data-href="{$vo.url}" data-desc="{$vo.desc}">编辑</span>
+										<span class="layui-btn layui-btn-xs layui-btn-danger link-delete"
+											data-uid="{$vo.admin_id}" data-id="{$vo.id}">删除</span>
+									</div>
+								</td>
+							</tr>
+							{/volist}
+							{/empty}
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+	
+	<div class="layui-tab layui-tab-brief px-4" lay-filter="docDemoTabBrief">
+		<ul class="layui-tab-title">
+			<li class="layui-this">员工评论({$detail.comments})</li>
+			<li>操作日志({$detail.logs})</li>
+		</ul>
+		<div class="layui-tab-content p-0">
+			<div class="layui-tab-item comment-list layui-show">
+				<div class="comment-input my-2">
+					<input type="text" id="commentInput" readonly placeholder="发表一下你的看法" class="layui-input" value="">
+				</div>
+				<div id="comment_task_{$detail.id}"></div>
+			</div>
+			<div class="layui-tab-item logs-list">
+				<div id="log_task_{$detail.id}"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	function openInit() {
+		const admin_id = '{$detail.admin_id}';
+		const detail_id = '{$detail.id}';
+		const opsData = {
+			flow_status: [
+				{ 'id': 1, 'title': '未开始' },
+				{ 'id': 2, 'title': '进行中' },
+				{ 'id': 3, 'title': '已完成' },
+				{ 'id': 4, 'title': '不解决' },
+				{ 'id': 5, 'title': '已关闭' }
+			],
+			is_bug: [
+				{ 'id': 0, 'title': '普通任务(TASK)'},
+				{ 'id': 1, 'title': '问题缺陷(BUG)' },
+			],
+			priority: [
+				{ 'id': 1, 'title': '低' },
+				{ 'id': 2, 'title': '中' },
+				{ 'id': 3, 'title': '高' },
+				{ 'id': 4, 'title': '紧急' }
+			],
+			done_ratio: [
+				{ 'id': 0, 'title': '0%' },
+				{ 'id': 10, 'title': '10%' },
+				{ 'id': 20, 'title': '20%' },
+				{ 'id': 30, 'title': '30%' },
+				{ 'id': 40, 'title': '40%' },
+				{ 'id': 50, 'title': '50%' },
+				{ 'id': 60, 'title': '60%' },
+				{ 'id': 70, 'title': '70%' },
+				{ 'id': 80, 'title': '80%' },
+				{ 'id': 90, 'title': '90%' },
+			]
+		}
+		const layer = layui.layer, edit = layui.gouguEdit, comment = layui.gouguComment, schedule = layui.gouguSchedule, upload = layui.upload, tool = layui.tool;
+
+		$('.hover-edit').hover(function () {
+			$(this).addClass('hover-on');
+		}, function () {
+			$(this).removeClass('hover-on');
+		})
+
+		$('.hover-edit').on('click', 'i', function () {
+			let name = $(this).data('name');
+			let show_txt = $('#' + name + '_' + detail_id).text().replace(/[\r\n\t]/g, "");
+			let real_txt = $('#' + name + '_' + detail_id).data('val');
+			if (real_txt === '') {
+				real_txt = show_txt;
+			}
+			editShow(detail_id, name, show_txt, real_txt);
+		})
+
+		$('#delBtn').on('click', function () {
+			layer.confirm('确定要删除该任务吗？请慎重', { icon: 3, title: '提示' }, function (index) {
+				let callback = function (e) {
+					layer.closeAll();
+					layer.msg(e.msg);
+					setTimeout(function () {
+						location.reload();
+					}, 1000)
+				}
+				let postData = { "id": detail_id };
+				tool.delete("/task/index/delete", postData, callback);
+			});
+		})
+		
+		$('.add-son').on('click', function () {
+			let callback = function(data){
+				if(data.id!=0){
+					tool.post("/api/project/task_add_son", {'pid': detail_id, 'id': data.id}, function(e){
+						layer.msg(e.msg);
+						if(e.code==0){
+							tool.load('/task/index/view?id=' + detail_id);
+						}
+					})
+				}
+			}
+			edit.taskPicker(callback,{set_pid:detail_id});			
+		});
+		
+		$('.del-son').on('click', function () {
+			let id = $(this).data('id');
+			layer.confirm('确定取消该任务的父子关系吗?', {
+				icon: 3,
+				title: '提示'
+			}, function(index) {
+				let callback = function (e) {
+					layer.msg(e.msg);
+					if (e.code == 0) {
+						tool.load('/task/index/view?id=' + detail_id);
+					}
+				}
+				tool.delete("/api/project/task_del_son", {id: id}, callback);
+				layer.close(index);
+			});	
+		});
+
+		upload.render({
+			elem: '#flieBtn'
+			, url: '/api/index/upload'
+			, accept: 'file' //普通文件
+			, exts: 'jpeg|jpg|png|gif|doc|docx|ppt|pptx|xls|xlsx|pdf|zip|rar|7z' //只允许上传文件
+			, before: function (obj) {
+				layer.msg('上传中...', { time: 3600000 });
+			}
+			, done: function (res, index, upload) {
+				let callback = function (e) {
+					layer.msg('上传成功');
+					tool.load('/task/index/view?id=' + detail_id);
+				}
+				let postData = { 'topic_id': detail_id, 'file_id': res.data.id, 'file_name': res.data.name, 'module': 'task' };
+				tool.post("/api/appendix/add", postData, callback);
+			}
+			, error: function (index, upload) {
+				layer.msg('上传失败');
+			}
+		});
+
+		$('#flieList').on('click', '.file-delete', function () {
+			let id = $(this).data('id');
+			let uid = $(this).data('uid');
+			if (uid != GOUGU_DEV.uid) {
+				layer.msg('你不是该文件的上传人，无权限删除');
+				return false;
+			}
+			layer.confirm('确定要删除该附件吗?', { icon: 3, title: '提示' }, function (index) {
+				let callback = function (e) {
+					layer.closeAll();
+					layer.msg(e.msg);
+					tool.load('/task/index/view?id=' + detail_id);
+				}
+				let postData = { 'id': id };
+				tool.delete("/api/appendix/delete", postData, callback);
+			});
+		})
+
+		$('#linkBtn').on('click', function () {
+			comment.addLink(0, detail_id, 'task', '', '');
+		})
+		$('#linkList').on('click', '.link-edit', function () {
+			let id = $(this).data('id');
+			let url = $(this).data('href');
+			let desc = $(this).data('desc');
+			comment.addLink(id, detail_id, 'task', url, desc);
+		})
+		$('#linkList').on('click', '.link-delete', function () {
+			let id = $(this).data('id');
+			layer.confirm('确定要删除该链接吗?', { icon: 3, title: '提示' }, function (index) {
+				let callback = function (e) {
+					layer.closeAll();
+					layer.msg(e.msg);
+					tool.load("/task/index/view?id=" + detail_id);
+				}
+				let postData = { "id": id };
+				tool.delete("/api/appendix/delete_link", postData, callback);
+			});
+		})
+
+		$('.add-schedule').on('click', function () {
+			schedule.add(detail_id);
+		})
+		
+		$('#tableSchedule').on('click','[data-note="schedule"]', function () {
+			let _id = $(this).data('id');
+			let _type = $(this).data('type');
+			if (_type === 'edit') {
+				let callback = function (e) {
+					schedule.add(0,e.data);
+				}
+				let postData = { "id": _id };
+				tool.get("/api/schedule/view", postData, callback);				
+			}
+			if (_type === 'view') {
+				let callback = function (e) {
+					schedule.view(e.data);
+				}
+				let postData = { "id": _id };
+				tool.get("/api/schedule/view", postData, callback);	
+			}
+			if (_type === 'del') {
+				layer.confirm('确定要删除该工作记录吗？', { icon: 3, title: '提示' }, function (index) {
+					let callback = function (e) {
+						layer.closeAll();
+						layer.msg(e.msg);
+						if(e.code==0){
+							tool.load('/task/index/view?id=' + detail_id);
+						}
+					}
+					let postData = { "id": _id };
+					tool.delete("/schedule/index/delete", postData, callback);
+				});
+			}
+			return false;
+		})
+
+		//评论
+		comment.load(detail_id, 'task');
+		$('#commentInput').on('click', function () {
+			comment.editor(0, detail_id, 0, 0, 'task', '');
+		})
+		//回复
+		$('#comment_task_' + detail_id).on('click', '[data-event="replay"]', function () {
+			let pid = $(this).data('id');
+			let padmin_id = $(this).data('uid');
+			comment.editor(0, detail_id, pid, padmin_id, 'task', '');
+		})
+		//编辑
+		$('#comment_task_' + detail_id).on('click', '[data-event="edit"]', function () {
+			let id = $(this).data('id');
+			let mdcontent = $('#comment_' + id).data('mdcontent');
+			comment.editor(id, detail_id, 0, 0, 'task', mdcontent);
+		})
+
+		//删除
+		$('#comment_task_' + detail_id).on('click', '[data-event="del"]', function () {
+			let id = $(this).data('id');
+			comment.del(id, detail_id, 'task');
+		})
+
+		//操作记录
+		comment.log(detail_id, 'task');
+
+
+		let loading = false;
+		let editPost = function (id, name, show_val, real_val) {
+			let callback = function (e) {
+				layer.closeAll();
+				if (e.code == 0) {
+					tool.load('/task/index/view/id/' + id);
+					if (layui.taskTable) {
+						setTimeout(function () {
+							layui.taskTable.reload();
+						}, 400)
+					}
+				}
+				else {
+					layer.msg(e.msg);
+				}
+			}
+			let postData = { id: id };
+			postData[name] = real_val;
+			if (name == 'md_content') {
+				postData['content'] = show_val;
+			}
+			tool.post("/task/index/add", postData, callback);
+		}
+
+		function editShow(id, name, show_txt, real_txt) {
+			if (loading == true) {
+				return false;
+			}
+			if (name == "title" || name == "plan_hours") {
+				edit.text(id, name, real_txt, editPost);
+			}
+			if (name == "end_time") {
+				if (admin_id == GOUGU_DEV.uid) {
+					edit.date(id, name, real_txt, editPost);
+				} else {
+					layer.msg('您没权限修改，请联系创建人修改');
+				}
+			}
+			if (name == "director_uid") {
+				edit.employee_one(id, name, show_txt, real_txt, editPost);
+			}
+			if (name == "assist_admin_ids") {
+				edit.employee_more(id, name, show_txt, real_txt, editPost);
+			}
+			if (name == "flow_status" || name == "is_bug" || name == "priority" || name == "done_ratio") {
+				edit.dropdown(id, name, real_txt, opsData[name], editPost);
+			}
+			if (name == "type") {
+				loading = true;
+				tool.get("/api/index/get_task_cate", {}, function (res) {
+					let data = res.data;
+					loading = false;
+					edit.dropdown(id, name, real_txt, data, editPost, 0);
+				});
+			}
+			if (name == "cate") {
+				loading = true;
+				tool.get("/api/index/get_work", {}, function (res) {
+					let data = res.data;
+					loading = false;
+					edit.dropdown(id, name, real_txt, data, editPost, 0);
+				});
+			}
+			if (name == "project_id") {
+				if (admin_id == GOUGU_DEV.uid) {
+					loading = true;
+					tool.get("/api/index/get_project", {}, function (res) {
+						let data = res.data;
+						loading = false;
+						edit.dropdown(id, name, real_txt, data, editPost, 1);
+					});
+				} else {
+					layer.msg('您没权限修改，请联系创建人或负责人修改');
+				}
+			}
+			if (name == "md_content") {
+				edit.editor(id, name, real_txt, editPost);
+			}
+		}
+	}
+</script>

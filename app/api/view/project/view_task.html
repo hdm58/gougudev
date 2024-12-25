@@ -1,0 +1,76 @@
+<div class="table-content">
+	<div class="layui-form-bar border-t border-x">
+		<button class="layui-btn layui-btn-sm add-new">+ 新建任务</button>
+	</div>
+	<table class="layui-hide" id="test" lay-filter="test"></table>
+</div>
+<script>
+function pageInit(){
+	var project_id = {$id};
+	var treeTable = layui.treeTable,tool = layui.tool;	
+	layui.taskTable = treeTable.render({
+		elem: '#test',
+		title: '任务列表',
+		cellMinWidth:60,
+		url: "/api/project/get_project_task",
+		where:{'project_id':project_id},
+		tree: { // treeTable 特定属性集
+			view:{expandAllDefault:true,showIcon:false},
+		},
+		page: false,
+		cols: [[
+				{
+					field: 'id', title: '任务编号', width: 80, align: 'center', fixed: 'left', templet: function (d) {
+						return 'T' + d.id;
+					}
+				}
+				, {
+					field: 'flow_name', title: '状态', align: 'center', width: 80, templet: function (d) {
+						var html = '<span class="layui-badge bg-flow-' + d.flow_status + '">' + d.flow_name + '</span>';
+						return html;
+					}
+				}
+				, {
+					field: 'flow_name', title: '完成进度', align: 'center', width: 80, templet: function (d) {
+						if(d.done_ratio == 0){
+							return d.done_ratio;
+						}
+						else{
+							return d.done_ratio + '%';
+						}
+					}
+				}
+				, {
+					field: 'type_name', title: '类型', width: 80, align: 'center', templet: function (d) {
+						var html = '<span class="color-status-' + d.type + '">' + d.type_name + '</span>';
+						return html;
+					}
+				}
+				, {
+					field: 'title', title: '任务主题',minWidth: 240, rowspan: 2, templet: function (d) {
+						var html = '<span class="layui-badge bg-priority-' + d.priority + '">' + d.priority_name + '</span> <a class="open-a" data-href="/task/index/view/id/' + d.id + '">' + d.title + '</a>';
+						return html;
+					}
+				}
+				, { field: 'director_name', title: '负责人', align: 'center', width: 80 }
+				, { field: 'assist_admin_names', title: '协作人', width: 200 }
+				, { field: 'cate_name', title: '工作类型', width: 90, align: 'center' }
+				, { field: 'plan_hours', title: '预估工时', align: 'center', width: 80 }
+				, {
+					field: 'end_time', title: '预计结束日期', width: 150, templet: function (d) {
+						var html = d.end_time;
+						if (d.delay > 0) {
+							html += '<span class="color-status-0 ml-1" style="font-size:12px;">逾期' + d.delay + '天</span>';
+						}
+						return html;
+					}
+				}
+			]]
+	});
+	
+	//新增
+	$('.add-new').on('click',function(){
+		tool.open('/task/index/add?project_id='+project_id);
+	});
+}		
+</script>

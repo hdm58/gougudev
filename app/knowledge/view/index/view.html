@@ -1,0 +1,230 @@
+<div class="page-content">
+	<div class="p-4 border-b">
+		<h3 class="h3-title">{$detail.title}</h3>
+		<div class="font-gray">介绍：{$detail.desc}</div>
+	</div>
+	<div class="p-4">
+		<div class="mb-2">
+			<table class="layui-table">
+				<tr>
+					<td class="layui-td-gray">文档数</td>
+					<td style="text-align:center;">{$detail.count}</td>
+					<td class="layui-td-gray">阅览数</td>
+					<td style="text-align:center;">{$detail.views}</td>
+					<td class="layui-td-gray">收藏数</td>
+					<td style="text-align:center;">{$detail.sort}</td>
+					<td class="layui-td-gray">是否公开</td>
+					<td style="text-align:center;">
+					  {eq name="$detail.is_share" value="1"}是{/eq}
+					  {eq name="$detail.is_share" value="2"}否{/eq}
+					</td>
+					<td class="layui-td-gray">所属分类</td>
+					<td style="text-align:center;">
+					  {$detail.cate_name}
+					</td>
+					<td style="text-align:right;">
+					  <input type="hidden" name="knowledge_id" value="{$detail.id}">
+						<button class="layui-btn layui-btn-normal layui-btn-sm edit-doc">编辑</button>
+						<button class="layui-btn layui-btn-sm add-doc" title="添加一级目录">+ 添加一级目录</button>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<table class="layui-hide" id="treeTable" lay-filter="treeTable"></table>
+	</div>
+</div>
+<script>
+	function openInit(){
+		var tableId='treeTable',tool = layui.tool,table = layui.table,treeGrid = layui.treeGrid,layer=layui.layer;
+		treeGrid.render({
+			id:tableId
+			,elem: '#'+tableId
+			,idField:'id'
+			,url:'/api/index/get_doc_list'
+			,cellMinWidth: 100
+			,treeId:'id'//树形id字段名称
+			,treeUpId:'pid'//树形父id字段名称
+			,treeShowName:'title'//以树形式显示的字段
+			,heightRemove:[".dHead",138]//不计算的高度,表格设定的是固定高度，此项不生效
+			,height:'100%'
+			,isFilter:false
+			,iconOpen:false//是否显示图标【默认显示】
+			,isOpenDefault:true//节点默认是展开还是折叠【默认展开】
+			,loading:true
+			,isPage:false
+			,where:{kid:$('[name="knowledge_id"]').val()}
+			,cols: [[
+				{field:'id',width:80, title: '编码ID', align:'center'}
+				,{field: 'sort', title: '排序', edit: 'text', align:'center', style:'cursor: pointer;', width:80}
+				,{field:'pid', title: '父级ID', edit:'text',width:80, align:'center'}
+				,{field:'type', title: '类型',width:80,align:'center',templet: function(d){
+					var html='';
+					if(d.type==1){
+						html='<span class="layui-btn layui-btn-warm layui-btn-xs">文档</span>';
+					}
+					else if(d.type==2){
+						html='<span class="layui-btn layui-btn-xs">目录</span>';
+					}
+					if(d.type==3){
+						html='<span class="layui-btn layui-btn-normal layui-btn-xs">链接</span>';
+					}
+					return html;
+				}}
+				,{field:'title', edit:'text',title: '章节名称'}
+				,{field: 'read',title: '阅览数',align: 'center',width: 80}
+				,{width:166,title: '操作', align:'center',templet: function(d){
+						var html='<span class="layui-btn-group">';
+						html+='<a class="layui-btn layui-btn-xs" title="新建子节点" lay-event="add">新建子节点</a>';
+						html+='<a class="layui-btn layui-btn-normal layui-btn-xs" title="编辑" href="/knowledge/index/doc_add/id/'+d.id+'">编辑</a>';
+						html+='<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>';
+						html+='</span>';
+						return html;
+					}
+				}
+			]]
+		});
+		//单元格编辑
+		treeGrid.on('edit('+tableId+')', function(obj){
+			layer.confirm('确定要提交修改吗?', {icon: 3, title:'提示'}, function(index){
+				let editData={};
+				editData['id'] = obj.data.id;
+				editData[obj.field] = obj.value;				
+				
+				let callback = function(e){
+					layer.msg(e.msg);
+					if(e.code == 0){
+						treeGrid.reload(tableId);
+						setTimeout(function(){							
+							layer.closeAll();
+						},1000)						  
+					}
+				}
+				tool.post('/knowledge/index/doc_add',editData,callback);				
+			})
+		});
+		
+		//删除
+		treeGrid.on('tool('+tableId+')',function (obj) {
+			if(obj.event === 'del'){
+				layer.confirm('确定要删除吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function(e){
+						layer.msg(e.msg);
+						if(e.code == 0){
+							obj.del();
+							setTimeout(function(){							
+								layer.closeAll();
+							},1000)						  
+						}
+					}
+					tool.post('/knowledge/index/doc_delete',{id:obj.data.id},callback);
+				});
+			}else if(obj.event==="add"){
+				add(obj.data.id);
+			}
+		});
+			
+		$('.edit-doc').on('click',function(){
+			let kid = $('[name="knowledge_id"]').val();
+			tool.load('/knowledge/index/add/id/'+kid+'.html');
+		})
+		//新增
+		$('.add-doc').on('click',function(){
+			add(0);
+		});
+			
+		//添加
+		var selectTable=null;
+		function add(pid) {
+			var type=[{'id':1,'title':'新建文档'},{'id':2,'title':'新建目录'},{'id':3,'title':'新建链接'}];
+			layer.open({
+				title:'选择节点类型',
+				type:1,
+				area:['360px','300px'],
+				content:'<div style="width:328px; padding:15px 15px 0"><div id="selectType"></div></div>',
+				success:function(){
+					selectTable=table.render({
+						elem: '#selectType',
+						cols: [[ //标题栏
+							{type:'radio',title: '选择'},
+							{field: 'title', title: '节点类型'}
+						]],
+						data: type
+					  });			
+				},
+				btn:['确定'],
+				btnAlign:'c',
+				yes: function(idx){
+					let checkStatus = table.checkStatus(selectTable.config.id);
+					let data = checkStatus.data;
+					if(data.length>0){
+						if(data[0].id==1 || data[0].id==2){
+							layer.prompt({title: '标题', formType: 3,value :''}, function(text, index){
+								if(text == ''){
+									layer.msg('输入标题');
+									return false;
+								}
+								let postData = {knowledge_id:$('[name="knowledge_id"]').val(),pid:pid,type:data[0].id,title:text}
+								let callback = function(e){
+									layer.msg(e.msg);
+									if(e.code == 0){
+										treeGrid.reload(tableId);
+										setTimeout(function(){							
+											layer.closeAll();
+										},1000)						  
+									}
+								}
+								tool.post('/knowledge/index/doc_add',postData,callback);									
+							})
+						}else if(data[0].id==3){
+							var content='<div style="padding:0 15px;"><table class="layui-table">\
+								<tr>\
+									<td class="layui-td-gray">链接标题 <span style="color: red">*</span></td>\
+									<td><input name="title" id="docTitle" class="layui-input" value="" placeholder="请输入标题"></td>\
+								</tr>\
+								<tr>\
+									<td class="layui-td-gray">URL链接 <span style="color: red">*</span></td>\
+									<td><input name="link" id="docLink" class="layui-input" value="" placeholder="请输入链接"></td>\
+								</tr>\
+							</table></div>';
+							layer.open({
+								type:1,
+								title:'新建链接',
+								area:['480px','300px'],
+								content:content,
+								btn: ['确定提交'],
+								btnAlign:'c',
+								yes: function(idx){
+									let docTitle = $('#docTitle').val();
+									let docLink = $('#docLink').val();
+									if(docTitle==''){
+										layer.msg('请输入标题');
+										return;
+									}
+									if(docLink==''){
+										layer.msg('请输入链接');
+										return;
+									}
+									let postData = {knowledge_id:$('[name="knowledge_id"]').val(),pid:pid,type:data[0].id,title:docTitle,link:docLink}
+									let callback = function(e){
+										layer.msg(e.msg);
+										if(e.code == 0){
+											treeGrid.reload(tableId);
+											setTimeout(function(){							
+												layer.closeAll();
+											},1000)						  
+										}
+									}
+									tool.post('/knowledge/index/doc_add',postData,callback);			
+								}
+							})	
+						}
+					}
+					else{
+						layer.msg('请选择节点类型');
+						return false;
+					}
+				}
+			})	
+		}
+	}	
+</script>

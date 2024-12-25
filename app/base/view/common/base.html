@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="renderer" content="webkit" />
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	{block name="meta"}
+	<link rel="mobile-prefetch" href="" />
+	{/block}
+	{block name="title"}
+	<title>{:get_system_config('web','admin_title')}</title>
+	{/block}
+	{block name="keywords"}
+	<meta name="keywords" content="{:get_system_config('web','keywords')}" />
+	<meta name="description" content="{:get_system_config('web','desc')}" />
+	{/block}
+	{block name="css"}
+	<link rel="stylesheet" href="{__GOUGU__}/gougu/css/gougu.css?v={$params.version}">
+	<link rel="stylesheet" href="{__GOUGU__}/gougu/module/editormd/css/editormd.min.css">
+	<link rel="stylesheet" href="{__GOUGU__}/gougu/module/editormd/css/editormd.preview.min.css">
+	<link rel="stylesheet" href="{__CSS__}/common.css?v={$params.version}">
+	{/block}
+	{block name="style"}{/block}
+	<script src="{__STATIC__}/jquery.min.js"></script>
+	<script>
+		const GOUGU_DEV = {
+			uid: '{$params.uid}',
+			name: '{$params.name}',
+			module: '{$params.module}',
+			controller: '{$params.controller}',
+			action: '{$params.action}',
+			version: '{$params.version}'
+		};
+	</script>
+	{block name="js"}{/block}
+</head>
+
+<body class="layui-layout-body">
+	<div class="layui-layout layui-layout-admin">
+		<div class="layui-header">
+			<div class="header-breadcrumb layui-layout-left">
+				{block name="breadcrumb"}
+				<span class="layui-breadcrumb">
+					<a href="https://www.gougucms.com/home/pages/detail/s/gougudev.html" target="_blank">勾股DEV</a>
+					<a><cite>工作台</cite></a>
+				</span>
+				{/block}
+			</div>
+			<ul class="layui-layout-right">
+				<li class="layui-nav-item">
+					<a href="javascript:;" id="add-new" title="新建内容">
+						<i class="layui-icon layui-icon-add-circle"></i>
+					</a>
+				</li>
+				<li class="layui-nav-item">
+					<a href="/home/message/inbox" id="notice" title="消息通知">
+						<i class="layui-icon layui-icon-notice"></i>
+					</a>
+					<div id="msgNum" class="msg-num" style="display:none;"><span>0</span></div>
+				</li>
+				<li class="layui-nav-item">
+					<a href="javascript:;" id="del-cache" title="清空缓存">
+						<i class="layui-icon layui-icon-fonts-clear"></i>
+					</a>
+				</li>
+				<li class="layui-nav-item">
+					<a href="javascript:;" id="refresh" title="刷新当前页">
+						<i class="layui-icon layui-icon-refresh"></i>
+					</a>
+				</li>
+				<li class="layui-nav-item">
+					<a href="javascript:;" id="loginout" title="{$params.name}-点击退出登录">
+						<img src="{$params.thumb}" class="layui-login-img"
+							onerror="javascript:this.src='{__IMG__}/icon.png';this.onerror=null;">
+					</a>
+				</li>
+			</ul>
+		</div>
+
+		<div class="layui-side">
+			{block name="side"}
+			<div class="side-memu">
+				<div class="side-memu-box">
+					<a class="item logo" href="/home/index">
+						<div class="gg-logo" title="{:get_system_config('web','admin_title')}">
+							<img src="{__IMG__}/icon.png" alt="{:get_system_config('web','admin_title')}" />
+						</div>
+					</a>
+					<a class="item {if condition=" $params.url eq 'home/index/index'"} active{/if}"
+						href="/home/index"><i class="iconfont icon-xueshuguanli"></i>
+						<div class="text">工作台</div>
+					</a>
+					{foreach name=":get_menus()" item="a"}
+					{gt name="$a.id" value="1"}
+					<a class="item {if condition='strpos($a.src,$params.module) nheq false'} active{/if}"
+						href="/{$a.src}"><i class="iconfont {$a.icon}"></i>
+						<div class="text">{$a.title}</div>
+					</a>
+					{/gt}
+					{/foreach}
+				</div>
+				<div class="side-memu-footer">
+					<a class="item" href="/home/user/setting" title="设置"><i class="iconfont icon-shezhi"></i></a>
+				</div>
+			</div>
+			{/block}
+		</div>
+
+		<div class="layui-body">
+			{block name="body"}
+			<div style="padding: 15px;">内容主体区域</div>
+			{/block}
+		</div>
+
+
+		{block name="footer"}{/block}
+	</div>
+	<script>
+		//右上角注销
+		$("#loginout").on("click", function () {
+			layer.confirm('确认注销登录吗?', { icon: 7, title: '警告' }, function (index) {
+				//注销
+				$.ajax({
+					url: "/home/login/login_out",
+					success: function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							setTimeout(function () {
+								location.href = "/home/login/index.html"
+							}, 1000)
+						}
+					}
+				})
+				layer.close(index);
+			});
+		});
+
+		//右上角消息
+		$("#msgNum").on('click', function () {
+			window.location.href = "/home/message/inbox";
+			return false;
+		})
+		//右上角刷新
+		$("#refresh").on('click', function () {
+			location.reload();
+			return false;
+		})
+
+		//右上角清除缓存
+		$("#del-cache").on('click', function (e) {
+			var that = $(this);
+			if (that.attr('class') === 'clearThis') {
+				layer.tips('正在努力清理中...', this);
+				return false;
+			}
+			layer.tips('正在清理系统缓存...', this);
+			that.attr('class', 'clearThis');
+			$.ajax({
+				url: "/api/index/cache_clear",
+				success: function (res) {
+					if (res.code == 0) {
+						setTimeout(function () {
+							that.attr('class', '');
+							layer.tips(res.msg, that);
+						}, 1000)
+					} else {
+						layer.tips(res.msg, that);
+					}
+				}
+			})
+		})
+
+		var intervalTime = 3000;
+		//获取消息
+		function getMsg() {
+			$.ajax({
+				url: "/home/index/index",
+				type: 'get',
+				success: function (e) {
+					intervalTime = 30000;
+					if (e.code == 0 && e.data != '') {
+						if (e.data.msg_num > 0) {
+							$('#msgNum').show().find('span').html(e.data.msg_num);
+						}
+						else {
+							$('#msgNum').hide().find('span').html(0);
+						}
+					}
+				}
+			})
+		}
+		//轮循获取消息,第一次页面加载完成3秒后，后期每30秒轮询一次
+		setTimeout(function () {
+			getMsg();
+			setInterval(function () {
+				getMsg();
+			}, 30000);
+		}, 3000)
+	</script>
+	<!-- 脚本 -->
+	{block name="script"}
+	<script>
+		const moduleInit = ['tool','admin'];
+		function gouguInit() {
+			console.log('加载完毕...');
+		}
+	</script>
+	{/block}
+	<!-- /脚本 -->
+	<script src="{__GOUGU__}/layui/layui.js"></script>
+	<script src="{__GOUGU__}/gougu/gouguInit.js"></script>
+	<!-- 统计代码 -->
+	{block name="code"}{/block}
+	<!-- /统计代码 -->
+</body>
+
+</html>

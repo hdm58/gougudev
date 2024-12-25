@@ -1,0 +1,166 @@
+{extend name="../../base/view/common/base" /}
+{block name="breadcrumb"}
+<span class="layui-breadcrumb">
+  <a href="https://www.gougucms.com/" target="_blank">勾股DEV</a>
+  <a href="/home/index">工作台</a>
+  <a><cite>垃圾箱</cite></a>
+</span>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="main-content">
+	{include file="../../base/view/common/msgmenu" /}
+	<div class="main-page-content">
+		<form class="layui-form layui-form-bar">
+			<div class="layui-inline" style="width:240px">
+				<input type="text" name="keywords" placeholder="关键字" class="layui-input" autocomplete="off"/>
+			</div>
+			<div class="layui-input-inline" style="width:160px;">
+				<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="searchform"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+				<button type="reset" class="layui-btn layui-btn-reset" lay-filter="reset">清空</button>
+			</div>
+		</form> 
+		<table class="layui-hide" id="rubbish" lay-filter="rubbish"></table>
+	</div>
+</div>
+
+<script type="text/html" id="mail_type">
+	<span class="color-priority-{{d.delete_source}}">{{d.delete_source_title}}</span>
+</script>
+<script type="text/html" id="is_read">
+	<span class="color-priority-{{d.is_read}}">{{d.is_read_title}}</span>
+</script>
+
+<script type="text/html" id="toolbarDemo">
+	<div class="layui-btn-container">
+		<button class="layui-btn layui-btn-sm" lay-event="add"><i class="layui-icon">&#xe61f;</i>新建消息</button>
+		<button class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon">&#xe640;</i>彻底删除</button>
+		<button class="layui-btn layui-btn-sm" lay-event="recover"><i class="layui-icon">&#xe609;</i>移出垃圾箱</button>
+	</div>
+</script>
+
+<script type="text/html" id="barDemo">
+<div class="layui-btn-group"><button class="layui-btn layui-btn-xs" lay-event="recover">还原</button><button class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">彻底删除</button></div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	const moduleInit = ['tool','employeepicker','dtree'];
+	function gouguInit() {
+		var table = layui.table,form = layui.form,tool = layui.tool;
+
+		layui.pageTable = table.render({
+			elem: '#rubbish',
+			toolbar: '#toolbarDemo',
+			title:'垃圾箱',
+			url: "/home/message/rubbish", //数据接口
+			page: true ,//开启分页
+			limit: 20,
+			cellMinWidth: 200, //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+			height: 'full-112',	
+			cols: [[ //表头
+			  {type:'checkbox',fixed:'left'},
+			  {field: 'delete_source_title', title: '来源',toolbar: '#mail_type',width:90,align:'center'},
+			  {field: 'from_name', title: '发件人', width:110,align:'center'},
+			  {field: 'title', title: '消息主题',templet:function(d){
+				var html = '<a class="open-a" data-href="/home/message/read/id/'+d.id+'">'+d.title+'</a>';
+				return html;
+			  }},
+			  {field: 'send_time', title: '发送时间', align:'center',width:160},
+			  {field: 'files', title: '附件(个)',align:'center', width:80},
+			  {field: 'right', title: '操作',fixed:'right', toolbar: '#barDemo', width:120, align:'center'}
+			]]
+		});
+		
+		//监听搜索提交
+		form.on('submit(searchform)', function(data){
+			layui.pageTable.reload({where:data.field,page:{curr:1}});
+			return false;
+		});
+
+		//监听行工具事件
+		table.on('tool(rubbish)', function(obj){
+			var data = obj.data;
+			if(obj.event === 'del'){
+				layer.confirm('确定把该信息彻底删除吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+						}
+					}
+					tool.post("/home/message/check",{
+						ids: data.id,
+						type:4
+					},callback);
+					layer.close(index);
+				})
+			}
+			if(obj.event === 'recover'){
+				layer.confirm('确定把该信息移出垃圾箱吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+						}
+					}
+					tool.post("/home/message/check",{
+						ids: data.id,
+						type:3,
+					},callback);
+					layer.close(index);
+				})
+			}
+		});
+		  
+		//表头工具栏事件
+		table.on('toolbar(rubbish)', function(obj){
+			var checkStatus = table.checkStatus(obj.config.id); //获取选中行状态
+			var data = checkStatus.data;
+			if (obj.event === 'add') {
+				tool.open("/home/message/add");
+				return;
+			}
+			if(data.length==0){
+				layer.msg('请选择要操作的消息');
+				return false;
+			}
+			var idArray=[],msg='是否执行该操作？',type=0;
+			for(var i=0;i<data.length;i++){
+				idArray.push(data[i].id);
+			}
+			switch(obj.event){
+				case 'recover':
+					msg = '确定把选中的信息移出垃圾箱吗?';
+					type = 3;
+				break;
+				case 'del':
+					msg = '确定把选中的信息彻底删除吗?';
+					type = 4;
+				break;
+			};
+			
+			layer.confirm(msg, {
+				icon: 3,
+				title: '提示'
+			}, function (index) {
+				let callback = function (e) {
+					layer.msg(e.msg);
+					if (e.code == 0) {
+						layui.pageTable.reload();
+					}
+				}
+				tool.post("/home/message/check",{
+					ids: idArray.join(','),
+					type:type
+				},callback);
+				layer.close(index);
+			});
+		});
+	}		
+</script>
+{/block}
+<!-- /脚本 -->
